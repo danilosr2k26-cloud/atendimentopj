@@ -193,6 +193,12 @@
             <div class="f"><label for="cidade">Cidade</label><input id="cidade"></div>
           </div>
           <div class="row c2">
+            <div class="f"><label for="fantasia">Nome fantasia</label><input id="fantasia"></div>
+            <div class="f"><label for="natureza">Natureza jurídica</label><input id="natureza"></div>
+            <div class="f"><label for="capital">Capital social</label><input id="capital"></div>
+            <div class="f"><label for="porte">Porte / Segmento</label><input id="porte"></div>
+          </div>
+          <div class="row c2">
             <div class="f"><label for="situacao">Situação</label>
               <select id="situacao"><option>ATIVA</option><option>INATIVA</option><option>SUSPENSA</option><option>BAIXADA</option></select></div>
             <div class="f"><label for="sitcad">Situação cadastral</label>
@@ -258,6 +264,10 @@ function paintPhoto(ctx, photo, data) {
   const nameH=filled('nome')?block('NOME: '+upper('nome'),0,y,746):0;
   let docH=0;if(value('doc')){const docText='CPF/CNPJ: '+upper('doc');let docLines=[''];for(const ch of Array.from(docText)){let i=docLines.length-1;if(ctx.measureText(docLines[i]+ch).width>400)docLines.push(ch);else docLines[i]+=ch;}docLines.forEach((t,i)=>text(t,773,y+i*line));docH=docLines.length*line;}
   const companyHeight=Math.max(nameH,docH);y+=companyHeight>0?companyHeight+6:0;
+  if(filled('fantasia'))y+=field('FANTASIA: ','fantasia',y);
+  if(filled('natureza'))y+=field('NATUREZA JURIDICA: ','natureza',y);
+  if(filled('capital'))y+=field('CAPITAL SOCIAL: ','capital',y);
+  if(filled('porte'))y+=field('PORTE EMPRESA: ','porte',y);
   if(filled('endereco'))y+=field('ENDERECO: ','endereco',y);
   y+=Math.max(filled('cep')?block('CEP: '+upper('cep'),0,y,590):0,filled('bairro')?block('BAIRRO: '+upper('bairro'),612,y,568):0);
   y+=Math.max(filled('uf')?block('UF: '+upper('uf'),0,y,590):0,filled('cidade')?block('CIDADE: '+upper('cidade'),612,y,568):0);
@@ -270,10 +280,10 @@ function paintPhoto(ctx, photo, data) {
   if(filled('email'))y+=block('EMAIL: '+value('email'),0,y,width);
   if(filled('atualiza')){y+=27;y+=field('DATA ULTIMA ATUALIZACAO: ','atualiza',y,RED);}
   y+=9;
-  const xs=[14,80,367,675,960],ws=[48,267,290,265,220];
-  ['N','CARGO','NOME','CPF','CONTATO'].forEach((t,i)=>text(t,xs[i],y));y+=line;
+  const xs=[14,62,248,546,682,812,1006],ws=[40,180,288,132,126,188,174];
+  ['N','CARGO','NOME','NASC','RENDA','CPF','CONTATO'].forEach((t,i)=>text(t,xs[i],y));y+=line;
   for(const [index,s] of (data.socios||[]).entries()){
-    const cells=[String(index+1),s.cargo,s.nome,s.cpf,s.contato].map(t=>String(t||'').toUpperCase());
+    const cells=[String(index+1),s.cargo,s.nome,String(s.nasc||'').split('(')[0].trim(),s.renda,s.cpf,s.contato].map(t=>String(t||'').toUpperCase());
     y+=Math.max(...cells.map((t,i)=>block(t,xs[i],y,ws[i])));
   }
   rule(y-7);y+=17;text('CONS EFETUADA _',0,y);rule(y+16);y+=44;
@@ -288,22 +298,22 @@ function paintPhoto(ctx, photo, data) {
 
 
 const $=id=>document.getElementById(id);
-const keys=['matricula','datahora','ag','produto','pag','conta','nome','doc','atualiza','endereco','cep','bairro','uf','cidade','celular','email','topaz','usuario','situacao','sitcad'];
+const keys=['matricula','datahora','ag','produto','pag','conta','nome','doc','fantasia','natureza','capital','porte','atualiza','endereco','cep','bairro','uf','cidade','celular','email','topaz','usuario','situacao','sitcad'];
 const STORE='cadastro_foto_monitor_v1';
-let socios=[{cargo:'ADMINISTRADOR',nome:'PEDRO AUGUSTO PEREIRA DE BARROS',cpf:'105.680.109-30',contato:'(45) 99803-1481'}];
+let socios=[{cargo:'ADMINISTRADOR',nome:'PEDRO AUGUSTO PEREIRA DE BARROS',nasc:'',renda:'',cpf:'105.680.109-30',contato:'(45) 99803-1481'}];
 let ready=false,pending=0,saveTimer=0,lastLayout=null;
 const canvas=$('photoCanvas'),ctx=canvas.getContext('2d'),photo=new Image();
 function snapshot(){const d={socios:socios.map(s=>({...s}))};keys.forEach(k=>d[k]=$(k).value);return d;}
 function save(){try{localStorage.setItem(STORE,JSON.stringify(snapshot()));$('draftStatus').textContent='Rascunho salvo neste navegador.';}catch(e){$('draftStatus').textContent='Não foi possível salvar o rascunho. Você ainda pode baixar a imagem.';}}
-function load(){try{const raw=localStorage.getItem(STORE);if(!raw)return;const d=JSON.parse(raw);if(!d||typeof d!=='object')return;keys.forEach(k=>{if(typeof d[k]==='string')$(k).value=d[k];});if(Array.isArray(d.socios))socios=d.socios.filter(s=>s&&typeof s==='object').map(s=>Object.fromEntries(['cargo','nome','cpf','contato'].map(k=>[k,typeof s[k]==='string'?s[k]:''])));}catch(e){$('draftStatus').textContent='Rascunho indisponível; os campos iniciais foram carregados.';}}
+function load(){try{const raw=localStorage.getItem(STORE);if(!raw)return;const d=JSON.parse(raw);if(!d||typeof d!=='object')return;keys.forEach(k=>{if(typeof d[k]==='string')$(k).value=d[k];});if(Array.isArray(d.socios))socios=d.socios.filter(s=>s&&typeof s==='object').map(s=>Object.fromEntries(['cargo','nome','nasc','renda','cpf','contato'].map(k=>[k,typeof s[k]==='string'?s[k]:''])));}catch(e){$('draftStatus').textContent='Rascunho indisponível; os campos iniciais foram carregados.';}}
 function render(){pending=0;if(!ready)return;lastLayout=paintPhoto(ctx,photo,snapshot());$('layoutNotice').textContent=lastLayout.scale<.8?'A quantidade de texto reduziu o tamanho das letras para caber no monitor. Confira a legibilidade na prévia.':'';}
 function changed(){if(!pending)pending=requestAnimationFrame(render);clearTimeout(saveTimer);saveTimer=setTimeout(save,250);}
-function renderSocios(){const wrap=$('socios');wrap.replaceChildren();socios.forEach((s,i)=>{const card=document.createElement('div');card.className='socio';const head=document.createElement('div');head.className='shead';const name=document.createElement('span');name.className='sidx';name.textContent='Responsável '+(i+1);const rm=document.createElement('button');rm.type='button';rm.className='rm';rm.textContent='Remover';rm.addEventListener('click',()=>{socios.splice(i,1);renderSocios();changed();});head.append(name,rm);card.append(head);const row=document.createElement('div');row.className='row c2';['cargo','nome','cpf','contato'].forEach((k,j)=>{const f=document.createElement('div');f.className='f';const label=document.createElement('label');label.textContent=['Cargo','Nome','CPF','Contato'][j];const inp=document.createElement('input');inp.id='responsavel-'+i+'-'+k;label.htmlFor=inp.id;inp.value=s[k];inp.addEventListener('input',()=>{s[k]=inp.value;changed();});f.append(label,inp);row.append(f);});card.append(row);wrap.append(card);});}
+function renderSocios(){const wrap=$('socios');wrap.replaceChildren();socios.forEach((s,i)=>{const card=document.createElement('div');card.className='socio';const head=document.createElement('div');head.className='shead';const name=document.createElement('span');name.className='sidx';name.textContent='Responsável '+(i+1);const rm=document.createElement('button');rm.type='button';rm.className='rm';rm.textContent='Remover';rm.addEventListener('click',()=>{socios.splice(i,1);renderSocios();changed();});head.append(name,rm);card.append(head);const row=document.createElement('div');row.className='row c2';['cargo','nome','nasc','renda','cpf','contato'].forEach((k,j)=>{const f=document.createElement('div');f.className='f';const label=document.createElement('label');label.textContent=['Cargo','Nome','Nascimento','Renda','CPF','Contato'][j];const inp=document.createElement('input');inp.id='responsavel-'+i+'-'+k;label.htmlFor=inp.id;inp.value=s[k];inp.addEventListener('input',()=>{s[k]=inp.value;changed();});f.append(label,inp);row.append(f);});card.append(row);wrap.append(card);});}
 keys.forEach(k=>$(k).addEventListener('input',changed));
 $('form').addEventListener('submit',e=>e.preventDefault());
-$('addSocio').addEventListener('click',()=>{socios.push({cargo:'',nome:'',cpf:'',contato:''});renderSocios();changed();});
+$('addSocio').addEventListener('click',()=>{socios.push({cargo:'',nome:'',nasc:'',renda:'',cpf:'',contato:''});renderSocios();changed();});
 $('limpar').addEventListener('click',()=>{keys.forEach(k=>$(k).value='');socios=[];renderSocios();changed();});
-function copyText(){const d=snapshot();const up=k=>String(d[k]||'').toUpperCase();return ['Bradesco Net Empresa','MATRICULA: '+up('matricula'),'DATA/HORA: '+d.datahora,'#CONFIDENCIAL — #SISTEMA INTERNO','AG: '+up('ag')+' | PRODUTO: '+up('produto')+' | CONTA: '+up('conta')+' | PAG: '+up('pag'),'NOME: '+up('nome'),'CPF/CNPJ: '+up('doc'),'ENDERECO: '+up('endereco'),'CEP: '+up('cep')+' | BAIRRO: '+up('bairro'),'UF: '+up('uf')+' | CIDADE: '+up('cidade'),'SITUACAO: '+up('situacao'),'SITUACAO CADASTRAL: '+up('sitcad'),'MODULO TOPAZ: '+up('topaz'),'USUARIO: '+up('usuario'),'CELULAR: '+up('celular'),'EMAIL: '+d.email,'DATA ULTIMA ATUALIZACAO: '+up('atualiza'),'',...socios.map((s,i)=>[i+1,s.cargo,s.nome,s.cpf,s.contato].join(' | ').toUpperCase()),'','CONS EFETUADA _','F01 - AJUDA | F03 - RETORNAR | F04 - MENU | F05 - DETALHE'].join('\n').replace(/\\n/g,'\n');}
+function copyText(){const d=snapshot();const up=k=>String(d[k]||'').toUpperCase();return ['Bradesco Net Empresa','MATRICULA: '+up('matricula'),'DATA/HORA: '+d.datahora,'#CONFIDENCIAL — #SISTEMA INTERNO','AG: '+up('ag')+' | PRODUTO: '+up('produto')+' | CONTA: '+up('conta')+' | PAG: '+up('pag'),'NOME: '+up('nome'),'CPF/CNPJ: '+up('doc'),'FANTASIA: '+up('fantasia'),'NATUREZA JURIDICA: '+up('natureza'),'CAPITAL SOCIAL: '+up('capital'),'PORTE EMPRESA: '+up('porte'),'ENDERECO: '+up('endereco'),'CEP: '+up('cep')+' | BAIRRO: '+up('bairro'),'UF: '+up('uf')+' | CIDADE: '+up('cidade'),'SITUACAO: '+up('situacao'),'SITUACAO CADASTRAL: '+up('sitcad'),'MODULO TOPAZ: '+up('topaz'),'USUARIO: '+up('usuario'),'CELULAR: '+up('celular'),'EMAIL: '+d.email,'DATA ULTIMA ATUALIZACAO: '+up('atualiza'),'',...socios.map((s,i)=>[i+1,s.cargo,s.nome,s.nasc?('NASC: '+s.nasc):'',s.renda?('RENDA: '+s.renda):'',s.cpf,s.contato].filter(Boolean).join(' | ').toUpperCase()),'','CONS EFETUADA _','F01 - AJUDA | F03 - RETORNAR | F04 - MENU | F05 - DETALHE'].join('\n').replace(/\\n/g,'\n');}
 $('copy').addEventListener('click',async()=>{const txt=copyText();try{await navigator.clipboard.writeText(txt);$('toast').textContent='Texto copiado.';}catch(e){const ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';document.body.append(ta);ta.select();let ok=false;try{ok=document.execCommand('copy');}catch(e){}ta.remove();$('toast').textContent=ok?'Texto copiado.':'Não foi possível copiar neste navegador.';}});
 $('download').addEventListener('click',()=>{if(!ready)return;render();save();$('download').disabled=true;$('toast').textContent='Preparando PNG…';try{canvas.toBlob(blob=>{if(!blob){$('toast').textContent='Não foi possível gerar o PNG.';$('download').disabled=false;return;}const url=URL.createObjectURL(blob),a=document.createElement('a');const name=$('nome').value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,65)||'cadastro';a.href=url;a.download=name+'.png';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);$('toast').textContent='PNG gerado (1448 × 1086).';$('download').disabled=false;},'image/png');}catch(e){$('toast').textContent='Falha ao gerar a imagem. Tente novamente.';$('download').disabled=false;}});
 window.addEventListener('pagehide',()=>{clearTimeout(saveTimer);save();});
@@ -314,15 +324,18 @@ $('btnCarregar').addEventListener('click', function(){
   BN.preencherCampos(dados, {
     datahora: () => agora, pag: () => '001',
     nome: d => d.nome, doc: d => d.cnpj,
+    fantasia: d => d.fantasia, natureza: d => d.natureza, capital: d => d.capital, porte: d => d.segmento,
     ag: d => d.ag, conta: d => d.conta,
     situacao: d => d.situacao, sitcad: () => 'REGULAR',
     usuario: d => d.usuario, celular: d => d.telefone, email: d => d.email,
     cidade: d => d.cidade, uf: d => d.uf, endereco: d => d.endereco, cep: d => d.cep, bairro: d => d.bairro
   });
-  if (dados.socio.nome || dados.socio.cpf){
-    if (!socios.length) socios.push({cargo:'',nome:'',cpf:'',contato:''});
+  if (dados.socio.nome || dados.socio.cpf || dados.socio.telefone || dados.socio.nasc){
+    if (!socios.length) socios.push({cargo:'',nome:'',nasc:'',renda:'',cpf:'',contato:''});
     const s = socios[0];
     if (dados.socio.nome) s.nome = dados.socio.nome;
+    if (dados.socio.nasc) s.nasc = dados.socio.nasc;
+    if (dados.socio.renda) s.renda = dados.socio.renda;
     if (dados.socio.cpf) s.cpf = dados.socio.cpf;
     if (dados.socio.telefone) s.contato = dados.socio.telefone;
     if (!s.cargo) s.cargo = 'ADMINISTRADOR';

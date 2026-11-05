@@ -65,7 +65,7 @@ const ASSETS={photo:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABSkAAALSCAIAA
 const SCHEMA=[
   ['matricula','Matrícula','','Cabeçalho'],['datahora','Data / hora','','Cabeçalho'],
   ['ag','Agência','','Cabeçalho'],['produto','Produto','','Cabeçalho'],['pag','Página','','Cabeçalho'],['conta','Conta','','Cabeçalho'],
-  ['nome','Nome / Razão social','','Empresa',true],['doc','CPF / CNPJ','','Empresa'],['atualiza','Última atualização','','Empresa'],
+   ['nome','Nome / Razão social','','Empresa',true],['doc','CPF / CNPJ','','Empresa'],['fantasia','Nome fantasia','','Empresa'],['natureza','Natureza jurídica','','Empresa'],['capital','Capital social','','Empresa'],['porte','Porte / Segmento','','Empresa'],['atualiza','Última atualização','','Empresa'],
   ['endereco','Endereço','','Endereço',true],['cep','CEP','','Endereço'],['bairro','Bairro','','Endereço'],['uf','UF','','Endereço'],['cidade','Cidade','','Endereço'],
   ['situacao','Situação','','Cadastro',false,['ATIVA','INATIVA','SUSPENSA','BAIXADA']],['sitcad','Situação cadastral','','Cadastro',false,['PENDENTE','REGULAR','EM ANÁLISE','APROVADO']],
   ['topaz','Módulo TOPAZ','','Cadastro'],['usuario','Usuário','','Cadastro'],['celular','Celular','','Contato'],['email','E-mail','','Contato']
@@ -76,7 +76,7 @@ function loadState(){
  const result=defaultState();
  try{const raw=localStorage.getItem(CONFIG.storage);const legacy=raw?null:localStorage.getItem(CONFIG.legacyStorage);const saved=JSON.parse(raw||legacy||'null');if(!saved)return result;
  const fields=saved.fields||saved;for(const [id,,,,,options] of SCHEMA)if(typeof fields[id]==='string'&&(!options||options.includes(fields[id])||fields[id]===''))result.fields[id]=fields[id];
- const partners=saved.partners||saved.socios;if(Array.isArray(partners))result.partners=partners.filter(p=>p&&typeof p==='object').map(p=>Object.fromEntries(['cargo','nome','cpf','contato'].map(k=>[k,typeof p[k]==='string'?p[k]:''])));
+ const partners=saved.partners||saved.socios;if(Array.isArray(partners))result.partners=partners.filter(p=>p&&typeof p==='object').map(p=>Object.fromEntries(['cargo','nome','nasc','renda','cpf','contato'].map(k=>[k,typeof p[k]==='string'?p[k]:''])));
  if(Number.isInteger(saved.page)&&saved.page>=0)result.page=saved.page;if(['light','dark'].includes(saved.theme))result.theme=saved.theme;
  }catch(error){/* An invalid draft never prevents opening the editor. */}return result;
 }
@@ -87,27 +87,30 @@ function status(message){$('status').textContent=message;}
 function saveState(){try{localStorage.setItem(CONFIG.storage,JSON.stringify(state));return true;}catch(error){status('O navegador não permitiu salvar o rascunho. A exportação continua disponível.');return false;}}
 function inputField(id,label,value,options,onInput){const box=document.createElement('div');box.className='field';const lab=document.createElement('label');lab.htmlFor=id;lab.textContent=label;const input=document.createElement(options?'select':'input');input.id=id;if(options){for(const value of ['',...options]){const option=document.createElement('option');option.value=value;option.textContent=value||'—';input.append(option);}}input.value=value;if(id==='uf')input.maxLength=2;input.addEventListener('input',()=>onInput(input.value));box.append(lab,input);return box;}
 function buildForm(){const groups=$('groups');groups.replaceChildren();let group,grid;for(const [id,label,value,section,wide,options] of SCHEMA){if(group!==section){group=section;const set=document.createElement('fieldset'),legend=document.createElement('legend');legend.textContent=section;grid=document.createElement('div');grid.className='fields';set.append(legend,grid);groups.append(set);}const field=inputField(id,label,state.fields[id],options,v=>{state.fields[id]=v;changed();});if(wide)field.classList.add('wide');grid.append(field);}buildPartners();applyTheme();}
-function buildPartners(){const wrapper=$('partners');wrapper.replaceChildren();state.partners.forEach((partner,index)=>{const card=document.createElement('div');card.className='partner';const head=document.createElement('div');head.className='partner-head';const title=document.createElement('strong');title.textContent='Responsável '+(index+1);const remove=document.createElement('button');remove.type='button';remove.className='remove';remove.textContent='Remover';remove.setAttribute('aria-label','Remover responsável '+(index+1));remove.onclick=()=>{state.partners.splice(index,1);buildPartners();changed();};head.append(title,remove);const grid=document.createElement('div');grid.className='fields';for(const [key,label] of [['cargo','Cargo'],['nome','Nome'],['cpf','CPF'],['contato','Contato']])grid.append(inputField(`partner-${index}-${key}`,label,partner[key],null,v=>{partner[key]=v;changed();}));card.append(head,grid);wrapper.append(card);});}
+function buildPartners(){const wrapper=$('partners');wrapper.replaceChildren();state.partners.forEach((partner,index)=>{const card=document.createElement('div');card.className='partner';const head=document.createElement('div');head.className='partner-head';const title=document.createElement('strong');title.textContent='Responsável '+(index+1);const remove=document.createElement('button');remove.type='button';remove.className='remove';remove.textContent='Remover';remove.setAttribute('aria-label','Remover responsável '+(index+1));remove.onclick=()=>{state.partners.splice(index,1);buildPartners();changed();};head.append(title,remove);const grid=document.createElement('div');grid.className='fields';for(const [key,label] of [['cargo','Cargo'],['nome','Nome'],['nasc','Nascimento'],['renda','Renda'],['cpf','CPF'],['contato','Contato']])grid.append(inputField(`partner-${index}-${key}`,label,partner[key],null,v=>{partner[key]=v;changed();}));card.append(head,grid);wrapper.append(card);});}
 function applyTheme(){document.documentElement.dataset.theme=state.theme;$('theme').textContent=state.theme==='dark'?'Tema claro':'Tema escuro';}
 function changed(){saveState();clearTimeout(renderTimer);renderTimer=setTimeout(render,CONFIG.debounce);}
 function textValue(key){const value=state.fields[key]||'—';return key==='email'?value:value.toLocaleUpperCase('pt-BR');}
 function wrapText(value,width){const output=[];for(const paragraph of String(value||'—').split(/\r?\n/)){let chars=Array.from(paragraph);while(chars.length>width){let split=chars.slice(0,width+1).lastIndexOf(' ');if(split<1)split=width;output.push(chars.slice(0,split).join(''));chars=chars.slice(split);while(chars[0]===' ')chars.shift();}output.push(chars.join(''));}return output;}
 function buildScreenModel(){
- const addressRows=Math.min(2,wrapText('ENDERECO: '+textValue('endereco'),43).length),shift=(addressRows-1)*24;
  const filled=key=>String(state.fields[key]||'').trim()!=='';
  const positions=[
- ['matricula','MATRICULA: ',55,97,60,1],['datahora','',870,90,19,1],
- ['ag','AG: ',56,165,21,1],['produto','PRODUTO: ',303,163,22,1],['conta','CONTA: ',552,160,23,1],['pag','PAG: ',839,157,20,1],
- ['nome','NOME: ',56,191,57,2],['doc','CPF/CNPJ: ',700,184,32,2],
- ['endereco','ENDERECO: ',56,240,43,2],['cep','CEP: ',56,264+shift,43,1],['uf','UF: ',56,288+shift,10,1],
- ['bairro','BAIRRO: ',560,259,46,1],['cidade','CIDADE: ',560,285,46,2],
- ['situacao','SITUACAO: ',56,312+shift,91,1],['sitcad','SITUACAO CADASTRAL: ',56,336+shift,91,1,true],['topaz','MODULO TOPAZ: ',56,360+shift,91,1,true],['usuario','USUARIO: ',56,384+shift,91,1],
- ['celular','CELULAR: ',58,432,91,1],['email','EMAIL: ',58,456,91,2],['atualiza','DATA ULTIMA ATUALIZAÇÃO: ',59,504,90,1,true]
+ ['matricula','MATRICULA: ',56,152,60,1],['datahora','',872,152,19,1],
+ ['ag','AG: ',56,178,22,1],['produto','PRODUTO: ',300,178,22,1],['conta','CONTA: ',548,178,23,1],['pag','PAG: ',840,178,19,1],
+ ['nome','NOME: ',56,204,44,2],['fantasia','FANTASIA: ',560,204,44,1],
+ ['doc','CPF/CNPJ: ',56,252,44,1],['cidade','CIDADE: ',560,228,44,2],
+ ['endereco','ENDERECO: ',56,276,44,1],['capital','CAPITAL SOCIAL: ',560,276,44,1],
+ ['cep','CEP: ',56,300,44,1],['porte','PORTE: ',560,300,44,1],
+ ['uf','UF: ',56,324,44,1],['natureza','NATUREZA: ',560,324,44,1],
+ ['situacao','SITUACAO: ',56,348,44,1],['bairro','BAIRRO: ',560,348,44,1],
+ ['sitcad','SITUACAO CADASTRAL: ',56,372,44,1,true],['topaz','MODULO TOPAZ: ',560,372,44,1,true],
+ ['usuario','USUARIO: ',56,396,44,1],['celular','CELULAR: ',560,396,44,1],
+ ['email','EMAIL: ',56,420,44,2],['atualiza','DATA ULTIMA ATUALIZACAO: ',560,420,44,1,true]
  ].filter(p=>filled(p[0]));
  const fields=positions.map(([key,label,x,y,cols,rows,pink])=>({key,label,x,y,cols,rows,pink,lines:key==='doc'?Array.from({length:Math.ceil(Array.from(label+textValue(key)).length/cols)},(_,i)=>Array.from(label+textValue(key)).slice(i*cols,(i+1)*cols).join('')):wrapText(label+textValue(key),cols)}));
  const partners=[];
  for(const [index,partner] of state.partners.entries()){
-  const cols=[String(index+1),partner.cargo,partner.nome,partner.cpf,partner.contato].map((s,i)=>wrapText(String(s||'—').toLocaleUpperCase('pt-BR'),[3,20,23,20,21][i]));
+   const cols=[String(index+1),partner.cargo,partner.nome,partner.nasc,partner.renda,partner.cpf,partner.contato].map((s,i)=>wrapText(String(s||'—').toLocaleUpperCase('pt-BR'),[3,17,15,10,11,13,16][i]));
   const count=Math.max(...cols.map(c=>Math.ceil(c.length/2)));
   for(let part=0;part<count;part++)partners.push({index,part,columns:cols.map((c,i)=>i===0?[String(index+1)]:c.slice(part*2,part*2+2))});
  }
@@ -119,7 +122,7 @@ function drawRule(y,slope=0){ctx.save();ctx.strokeStyle=CONFIG.rule;ctx.lineWidt
 function drawScreenBackground(){ctx.setTransform(CONFIG.scale,0,0,CONFIG.scale,0,0);ctx.clearRect(0,0,CONFIG.screenWidth,CONFIG.screenHeight);ctx.drawImage(assets.background,0,0,CONFIG.screenWidth,CONFIG.screenHeight);}
 function drawScreenHeader(){ctx.drawImage(assets.header,0,0);drawText('#CONFIDENCIAL',56,122);drawText('#SISTEMA INTERNO',870,115);drawRule(136,-10);}
 function drawFields(model){for(const field of model.fields){const part=Math.min(state.page,Math.ceil(field.lines.length/field.rows)-1);const lines=field.lines.slice(part*field.rows,(part+1)*field.rows);ctx.save();ctx.beginPath();ctx.rect(field.x-1,field.y-21,field.cols*CONFIG.charWidth+2,field.rows*CONFIG.lineHeight+2);ctx.clip();lines.forEach((line,i)=>{const y=field.y+i*CONFIG.lineHeight;if(field.pink&&part===0&&i===0){drawText(line.slice(0,field.label.length),field.x,y);drawText(line.slice(field.label.length),field.x+field.label.length*CONFIG.charWidth,y,CONFIG.pink);}else drawText(line,field.x,y,field.pink?CONFIG.pink:CONFIG.cyan);});ctx.restore();}}
-function drawPartners(model){const xs=[71,126,367,626,869],ys=[535,533,529,525,521];['N','CARGO','NOME','CPF','CONTATO'].forEach((label,i)=>drawText(label,xs[i],ys[i]));const partner=model.partners[Math.min(state.page,model.partners.length-1)];if(partner)partner.columns.forEach((lines,i)=>lines.forEach((line,j)=>drawText(line,xs[i],ys[i]+24+j*24)));else drawText('(SEM RESPONSAVEIS)',71,559);}
+function drawPartners(model){const xs=[71,116,300,466,580,704,848],ys=[536,533,530,527,524,520,516];['N','CARGO','NOME','NASC','RENDA','CPF','CONTATO'].forEach((label,i)=>drawText(label,xs[i],ys[i]));const partner=model.partners[Math.min(state.page,model.partners.length-1)];if(partner)partner.columns.forEach((lines,i)=>lines.forEach((line,j)=>drawText(line,xs[i],ys[i]+24+j*24)));else drawText('(SEM RESPONSAVEIS)',71,559);}
 function drawTerminalFooter(){drawRule(600,-14);drawText('CONS EFETUADA _',59,624);drawRule(639,-15);['F01 - AJUDA','F03 - RETORNAR','F04 - MENU','F05 - DETALHE'].forEach((label,i)=>drawText(label,[59,342,604,814][i],[666,660,655,650][i]));}
 function drawSimulationWarning(){const warning=CONFIG.warning;ctx.save();ctx.font=`bold ${warning.size}px Warning,monospace`;ctx.fillStyle=warning.color;ctx.textBaseline='alphabetic';ctx.shadowColor=warning.color;ctx.shadowBlur=.7;const width=ctx.measureText(warning.text).width;ctx.translate(warning.x,warning.y);ctx.transform(warning.width/width,.008,0,1,0,0);ctx.fillText(warning.text,0,0);ctx.restore();}
 function solveLinear(matrix,vector){const a=matrix.map((row,i)=>[...row,vector[i]]),n=vector.length;for(let column=0;column<n;column++){let pivot=column;for(let row=column+1;row<n;row++)if(Math.abs(a[row][column])>Math.abs(a[pivot][column]))pivot=row;if(Math.abs(a[pivot][column])<1e-12)throw Error('Geometria inválida.');[a[column],a[pivot]]=[a[pivot],a[column]];const divisor=a[column][column];for(let j=column;j<=n;j++)a[column][j]/=divisor;for(let row=0;row<n;row++)if(row!==column){const factor=a[row][column];for(let j=column;j<=n;j++)a[row][j]-=factor*a[column][j];}}return a.map(row=>row[n]);}
@@ -127,7 +130,7 @@ function calculateScreenHomography(){const destination=[[0,0],[CONFIG.screenWidt
 function prepareMapping(){const h=calculateScreenHomography(),target=[],source=[],weights=[];const minX=Math.max(0,Math.floor(Math.min(...CONFIG.corners.map(p=>p[0])))),maxX=Math.min(CONFIG.width-1,Math.ceil(Math.max(...CONFIG.corners.map(p=>p[0])))),minY=Math.max(0,Math.floor(Math.min(...CONFIG.corners.map(p=>p[1])))),maxY=Math.min(CONFIG.height-1,Math.ceil(Math.max(...CONFIG.corners.map(p=>p[1]))));
 for(let y=minY;y<=maxY;y++)for(let x=minX;x<=maxX;x++){const d=h[6]*x+h[7]*y+1;let u=(h[0]*x+h[1]*y+h[2])/d,v=(h[3]*x+h[4]*y+h[5])/d;if(u<0||v<0||u>=CONFIG.screenWidth-1||v>=CONFIG.screenHeight-1)continue;u*=CONFIG.scale;v*=CONFIG.scale;const ix=Math.floor(u),iy=Math.floor(v);target.push((y*CONFIG.width+x)*4);source.push((iy*plane.width+ix)*4);weights.push(u-ix,v-iy);}return{target:new Uint32Array(target),source:new Uint32Array(source),weights:new Float32Array(weights)};}
 function composeFinalImage(){const pixels=ctx.getImageData(0,0,plane.width,plane.height).data,frame=new ImageData(new Uint8ClampedArray(basePixels),CONFIG.width,CONFIG.height),stride=plane.width*4;for(let i=0;i<mapping.target.length;i++){const t=mapping.target[i],s=mapping.source[i],u=mapping.weights[i*2],v=mapping.weights[i*2+1];for(let c=0;c<3;c++)frame.data[t+c]=(pixels[s+c]*(1-u)+pixels[s+4+c]*u)*(1-v)+(pixels[s+stride+c]*(1-u)+pixels[s+stride+4+c]*u)*v;}out.putImageData(frame,0,0);}
-function buildText(){const lines=[CONFIG.warning.text,'DADOS INSERIDOS MANUALMENTE; NÃO REPRESENTAM CONSULTA AO BANCO.',''];for(const [key,label] of SCHEMA)lines.push(`${label}: ${state.fields[key]}`);lines.push('','RESPONSÁVEIS');state.partners.forEach((p,i)=>lines.push(`${i+1}. ${p.cargo} | ${p.nome} | ${p.cpf} | ${p.contato}`));return lines.join('\n');}
+function buildText(){const lines=[CONFIG.warning.text,'DADOS INSERIDOS MANUALMENTE; NÃO REPRESENTAM CONSULTA AO BANCO.',''];for(const [key,label] of SCHEMA)lines.push(`${label}: ${state.fields[key]}`);lines.push('','RESPONSÁVEIS');state.partners.forEach((p,i)=>lines.push(`${i+1}. ${p.cargo} | ${p.nome} | NASC: ${p.nasc||'—'} | RENDA: ${p.renda||'—'} | ${p.cpf} | ${p.contato}`));return lines.join('\n');}
 function render(){if(!ready)return;clearTimeout(renderTimer);const model=buildScreenModel();state.page=Math.max(0,Math.min(state.page,model.pages-1));drawScreenBackground();drawScreenHeader();drawFields(model);drawPartners(model);drawTerminalFooter();drawSimulationWarning();composeFinalImage();lastModel=model;canvas.dataset.ready='true';canvas.dataset.pages=String(model.pages);canvas.dataset.revision=String(++revision);$('pageInfo').textContent=`Visualização ${state.page+1} de ${model.pages}`;$('prev').disabled=state.page===0;$('next').disabled=state.page===model.pages-1;$('accessible').textContent=buildText();saveState();}
 async function loadAssets(){const entries=await Promise.all(Object.entries(ASSETS).map(async([key,src])=>{const image=new Image();image.src=src;await image.decode();return[key,image];}));await Promise.all([document.fonts.load('20px Terminal'),document.fonts.load('bold 24px Warning')]);return Object.fromEntries(entries);}
 function exportPNG(){if(!ready)return;render();$('download').disabled=true;canvas.toBlob(blob=>{try{if(!blob)throw Error('PNG indisponível.');const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=`monitor-pj-nova-imagem-pagina-${String(state.page+1).padStart(3,'0')}.png`;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),15000);status('PNG exportado com a identificação de simulação.');}catch(error){status('Não foi possível exportar a imagem.');}finally{$('download').disabled=false;}},'image/png');}
@@ -135,19 +138,21 @@ async function copyText(){const text=buildText();try{await navigator.clipboard.w
 $('btnCarregar').onclick=()=>{
   const d=BN.parseDadosCliente($('textoCliente').value);
   const n=new Date(),p=x=>String(x).padStart(2,'0'),agora=`${p(n.getDate())}/${p(n.getMonth()+1)}/${n.getFullYear()} ${p(n.getHours())}:${p(n.getMinutes())}`;
-  const map={nome:x=>d.nome,doc:x=>d.cnpj,ag:x=>d.ag,conta:x=>d.conta,cidade:x=>d.cidade,uf:x=>d.uf,situacao:x=>d.situacao,usuario:x=>d.usuario,celular:x=>d.telefone,email:x=>d.email,endereco:x=>d.endereco,cep:x=>d.cep,bairro:x=>d.bairro,pag:x=>'001',datahora:x=>agora};
+  const map={nome:x=>d.nome,doc:x=>d.cnpj,fantasia:x=>d.fantasia,natureza:x=>d.natureza,capital:x=>d.capital,porte:x=>d.segmento,ag:x=>d.ag,conta:x=>d.conta,cidade:x=>d.cidade,uf:x=>d.uf,situacao:x=>d.situacao,usuario:x=>d.usuario,celular:x=>d.telefone,email:x=>d.email,endereco:x=>d.endereco,cep:x=>d.cep,bairro:x=>d.bairro,pag:x=>'001',datahora:x=>agora};
   Object.keys(map).forEach(k=>{const v=map[k](d);if(v){state.fields[k]=v;}});
   if(d.socio.nome||d.socio.cpf){
-    if(!state.partners.length)state.partners.push({cargo:'',nome:'',cpf:'',contato:''});
+    if(!state.partners.length)state.partners.push({cargo:'',nome:'',nasc:'',renda:'',cpf:'',contato:''});
     const p=state.partners[0];
     if(d.socio.nome)p.nome=d.socio.nome;
+    if(d.socio.nasc)p.nasc=d.socio.nasc;
+    if(d.socio.renda)p.renda=d.socio.renda;
     if(d.socio.cpf)p.cpf=d.socio.cpf;
     if(d.socio.telefone)p.contato=d.socio.telefone;
     if(!p.cargo)p.cargo='Administrador';
   }
   buildForm();render();
 };
-$('form').onsubmit=event=>event.preventDefault();$('theme').onclick=()=>{state.theme=state.theme==='dark'?'light':'dark';applyTheme();saveState();};$('add').onclick=()=>{state.partners.push({cargo:'',nome:'',cpf:'',contato:''});buildPartners();changed();};$('clear').onclick=()=>{for(const [id] of SCHEMA)state.fields[id]='';const now=new Date(),pad=n=>String(n).padStart(2,'0');state.fields.datahora=`${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}`;state.partners=[];state.page=0;buildForm();changed();};$('restore').onclick=()=>{const theme=state.theme;state=defaultState();state.theme=theme;buildForm();changed();status('Exemplo restaurado.');};$('prev').onclick=()=>{state.page--;render();};$('next').onclick=()=>{state.page++;render();};$('download').onclick=exportPNG;$('copy').onclick=copyText;
+$('form').onsubmit=event=>event.preventDefault();$('theme').onclick=()=>{state.theme=state.theme==='dark'?'light':'dark';applyTheme();saveState();};$('add').onclick=()=>{state.partners.push({cargo:'',nome:'',nasc:'',renda:'',cpf:'',contato:''});buildPartners();changed();};$('clear').onclick=()=>{for(const [id] of SCHEMA)state.fields[id]='';const now=new Date(),pad=n=>String(n).padStart(2,'0');state.fields.datahora=`${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}`;state.partners=[];state.page=0;buildForm();changed();};$('restore').onclick=()=>{const theme=state.theme;state=defaultState();state.theme=theme;buildForm();changed();status('Exemplo restaurado.');};$('prev').onclick=()=>{state.page--;render();};$('next').onclick=()=>{state.page++;render();};$('download').onclick=exportPNG;$('copy').onclick=copyText;
 buildForm();loadAssets().then(result=>{assets=result;out.drawImage(assets.photo,0,0);basePixels=out.getImageData(0,0,CONFIG.width,CONFIG.height).data;mapping=prepareMapping();ready=true;render();$('download').disabled=false;status('Pronto. As alterações são salvas automaticamente.');}).catch(error=>{status('Não foi possível carregar os recursos incorporados. Reabra o arquivo.');console.error(error);});
 })();
 </script>
