@@ -94,15 +94,16 @@ function textValue(key){const value=state.fields[key]||'—';return key==='email
 function wrapText(value,width){const output=[];for(const paragraph of String(value||'—').split(/\r?\n/)){let chars=Array.from(paragraph);while(chars.length>width){let split=chars.slice(0,width+1).lastIndexOf(' ');if(split<1)split=width;output.push(chars.slice(0,split).join(''));chars=chars.slice(split);while(chars[0]===' ')chars.shift();}output.push(chars.join(''));}return output;}
 function buildScreenModel(){
  const addressRows=Math.min(2,wrapText('ENDERECO: '+textValue('endereco'),43).length),shift=(addressRows-1)*24;
+ const filled=key=>String(state.fields[key]||'').trim()!=='';
  const positions=[
  ['matricula','MATRICULA: ',55,97,60,1],['datahora','',870,90,19,1],
  ['ag','AG: ',56,165,21,1],['produto','PRODUTO: ',303,163,22,1],['conta','CONTA: ',552,160,23,1],['pag','PAG: ',839,157,20,1],
- ['nome','NOME: ',56,191,57,2],['doc','CPF/CNPJ: ',700,184,26,2],
+ ['nome','NOME: ',56,191,57,2],['doc','CPF/CNPJ: ',700,184,32,2],
  ['endereco','ENDERECO: ',56,240,43,2],['cep','CEP: ',56,264+shift,43,1],['uf','UF: ',56,288+shift,10,1],
  ['bairro','BAIRRO: ',560,259,46,1],['cidade','CIDADE: ',560,285,46,2],
  ['situacao','SITUACAO: ',56,312+shift,91,1],['sitcad','SITUACAO CADASTRAL: ',56,336+shift,91,1,true],['topaz','MODULO TOPAZ: ',56,360+shift,91,1,true],['usuario','USUARIO: ',56,384+shift,91,1],
  ['celular','CELULAR: ',58,432,91,1],['email','EMAIL: ',58,456,91,2],['atualiza','DATA ULTIMA ATUALIZAÇÃO: ',59,504,90,1,true]
- ];
+ ].filter(p=>filled(p[0]));
  const fields=positions.map(([key,label,x,y,cols,rows,pink])=>({key,label,x,y,cols,rows,pink,lines:key==='doc'?Array.from({length:Math.ceil(Array.from(label+textValue(key)).length/cols)},(_,i)=>Array.from(label+textValue(key)).slice(i*cols,(i+1)*cols).join('')):wrapText(label+textValue(key),cols)}));
  const partners=[];
  for(const [index,partner] of state.partners.entries()){
@@ -133,7 +134,8 @@ function exportPNG(){if(!ready)return;render();$('download').disabled=true;canva
 async function copyText(){const text=buildText();try{await navigator.clipboard.writeText(text);status('Texto copiado.');}catch(error){const area=document.createElement('textarea');area.value=text;document.body.append(area);area.select();const copied=document.execCommand('copy');area.remove();status(copied?'Texto copiado.':'O navegador bloqueou a cópia. Tente abrir o HTML em outro navegador.');}}
 $('btnCarregar').onclick=()=>{
   const d=BN.parseDadosCliente($('textoCliente').value);
-  const map={nome:x=>d.nome,doc:x=>d.cnpj,ag:x=>d.ag,conta:x=>d.conta,cidade:x=>d.cidade,uf:x=>d.uf,situacao:x=>d.situacao,usuario:x=>d.usuario,celular:x=>d.telefone,email:x=>d.email,endereco:x=>d.endereco,cep:x=>d.cep,bairro:x=>d.bairro,pag:x=>'001',datahora:x=>new Date().toLocaleString('pt-BR',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})};
+  const n=new Date(),p=x=>String(x).padStart(2,'0'),agora=`${p(n.getDate())}/${p(n.getMonth()+1)}/${n.getFullYear()} ${p(n.getHours())}:${p(n.getMinutes())}`;
+  const map={nome:x=>d.nome,doc:x=>d.cnpj,ag:x=>d.ag,conta:x=>d.conta,cidade:x=>d.cidade,uf:x=>d.uf,situacao:x=>d.situacao,usuario:x=>d.usuario,celular:x=>d.telefone,email:x=>d.email,endereco:x=>d.endereco,cep:x=>d.cep,bairro:x=>d.bairro,pag:x=>'001',datahora:x=>agora};
   Object.keys(map).forEach(k=>{const v=map[k](d);if(v){state.fields[k]=v;}});
   if(d.socio.nome||d.socio.cpf){
     if(!state.partners.length)state.partners.push({cargo:'',nome:'',cpf:'',contato:''});
