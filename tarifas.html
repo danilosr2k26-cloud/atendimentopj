@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Bradesco Net Empresa · Tarifas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="shortcut icon" href="https://banco.bradesco/assets/pessoajuridica/img/favicon.ico" type="image/x-icon">
+<link rel="stylesheet" href="css/theme.css">
+<style>
+  :root{
+    --bg:#f2f3f4; --surface:#ffffff; --surface-2:#f6f7f8;
+    --text:#191a1c; --muted:#5f6368; --border:#dcdee1;
+    --accent:#c6082f; --field:#f8f8f9; --danger:#b23b3b; --b-red:#c6082f;
+    --t-bg:#04070a; --t-label:#46d2c6; --t-value:#46d2c6; --t-hi:#f26a3c;
+    --t-red:#ff4d4a; --t-dim:#2a6a63; --t-white:#e6f4ee;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0f1012; --surface:#17181b; --surface-2:#121316;
+      --text:#e9eaec; --muted:#9aa0a6; --border:#2a2c30;
+      --accent:#e04a63; --field:#141518; --danger:#e07a7a; --b-red:#ff5f78; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0f1012; --surface:#17181b; --surface-2:#121316;
+    --text:#e9eaec; --muted:#9aa0a6; --border:#2a2c30;
+    --accent:#e04a63; --field:#141518; --danger:#e07a7a; --b-red:#ff5f78; color-scheme: dark;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1240px; margin:0 auto; padding-block:22px; padding-left:16px; padding-right:16px;}
+
+  header.top{display:flex; flex-wrap:wrap; align-items:center; gap:8px 14px; margin-bottom:12px;}
+  header.top h1{font-size:20px; font-weight:700; margin:0; letter-spacing:-.01em;}
+  header.top .brand{color:var(--accent); font-weight:700;}
+  .theme-btn{margin-left:auto; border:1px solid var(--border); background:var(--surface);
+    color:var(--text); font:inherit; font-size:12.5px; padding:7px 12px; border-radius:8px; cursor:pointer;}
+  .theme-btn:hover{border-color:var(--accent);}
+  .sub{margin:0 0 18px; color:var(--muted); font-size:13px; line-height:1.5;}
+
+  .grid{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.05fr); gap:20px; align-items:start;}
+  @media (max-width:920px){ .grid{grid-template-columns:1fr;} .screenwrap{position:static;} }
+
+  .panel{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px;}
+  .panel h2{font-size:12px; text-transform:uppercase; letter-spacing:.09em; color:var(--muted); margin:0 0 14px; font-weight:600;}
+  fieldset{border:0; margin:0 0 6px; padding:0;}
+  legend{font-size:12px; font-weight:700; color:var(--accent); padding:0; margin:14px 0 10px; text-transform:uppercase; letter-spacing:.05em;}
+  fieldset:first-of-type legend{margin-top:0;}
+  .row{display:grid; gap:10px 12px;}
+  .row.c2{grid-template-columns:1fr 1fr;}
+  .row.c3{grid-template-columns:1fr 1fr 1fr;}
+  @media (max-width:520px){ .row.c2,.row.c3{grid-template-columns:1fr;} }
+  .f{display:flex; flex-direction:column; gap:5px; min-width:0;}
+  .f.span2{grid-column:1 / -1;}
+  label{font-size:11.5px; font-weight:600; color:var(--muted); letter-spacing:.02em;}
+  input,select,textarea{font:inherit; font-size:13.5px; color:var(--text); background:var(--field);
+    border:1px solid var(--border); border-radius:8px; padding:8px 10px; width:100%; min-width:0;}
+  textarea{resize: vertical; min-height: 60px;}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--accent); outline-offset:1px; border-color:var(--accent);}
+
+  .btns{display:flex; flex-wrap:wrap; gap:9px; margin-top:14px;}
+  .btn{font:inherit; font-size:13px; font-weight:600; padding:9px 14px; border-radius:9px; cursor:pointer; border:1px solid var(--border); background:var(--surface); color:var(--text);}
+  .btn:hover{border-color:var(--accent);}
+  .btn.primary{background:var(--accent); border-color:var(--accent); color:#fff;}
+  :root[data-theme="dark"] .btn.primary,
+  :root:not([data-theme="light"]) .btn.primary{color:#fff;}
+  .btn.primary:hover{filter:brightness(1.05);}
+  .hint{font-size:11.5px; color:var(--muted); margin-top:10px; line-height:1.55;}
+
+  .screenwrap{position:sticky; top:calc(env(safe-area-inset-top,0px) + 12px);}
+  .screen{background:var(--t-bg); border-radius:12px; padding:16px 18px 14px; border:1px solid #10201c;
+    font-family:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+    font-size:12.5px; line-height:1.62; color:var(--t-value); position:relative; overflow:hidden;
+    box-shadow:0 0 0 1px rgba(60,220,180,.06), 0 18px 40px -20px rgba(0,0,0,.7), inset 0 0 60px -20px rgba(60,220,150,.10);}
+  .screen::after{content:""; position:absolute; inset:0; pointer-events:none;
+    background:repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0 2px, rgba(0,0,0,.16) 2px 3px); mix-blend-mode:multiply; opacity:.5;}
+  .screen *{position:relative; z-index:1;}
+  .tl{white-space:pre-wrap; word-break:break-word;}
+  .lbl{color:var(--t-label);} .val{color:var(--t-value);} .hi{color:var(--t-hi);} .wt{color:var(--t-white);} .red{color:var(--t-red);}
+  .rule{color:var(--t-dim); letter-spacing:1px; overflow:hidden; white-space:nowrap;}
+  .split{display:flex; justify-content:space-between; gap:12px;}
+  .cols4{display:grid; grid-template-columns:0.9fr 1fr 1.3fr 0.7fr; gap:4px 10px;}
+  @media (max-width:520px){ .cols4{grid-template-columns:1fr 1fr;} }
+  .cols2{display:grid; grid-template-columns:1fr 1fr; gap:4px 10px;}
+  .fkeys{display:grid; grid-template-columns:repeat(4,1fr); gap:2px 10px; color:var(--t-label);}
+  @media (max-width:520px){ .fkeys{grid-template-columns:1fr 1fr;} }
+  .cur{color:var(--t-value);}
+  @media (prefers-reduced-motion:no-preference){ .cur{animation:blink 1.1s step-end infinite;} }
+  @keyframes blink{50%{opacity:0;}}
+  .empty{color:#2f5a52;}
+  .scr-actions{display:flex; gap:9px; margin-top:12px; flex-wrap:wrap; align-items:center;}
+  .toast{font-size:11.5px; color:var(--accent); align-self:center;}
+  /* ════════ IDENTIDADE BRADESCO NET EMPRESA ════════
+     Troque o SVG .brinco por um <img> do logotipo oficial quando tiver
+     o arquivo (mantendo a classe .brinco). */
+  .marca{ display:inline-flex; align-items:center; gap:9px; }
+  .brinco{ width:30px; height:30px; color:var(--b-red,#c6082f); flex:none; display:block; }
+  .b-word{ font-size:20px; font-weight:800; letter-spacing:-.02em; color:var(--b-red,#c6082f); }
+  .b-sep{ width:1.5px; height:20px; background:var(--border,var(--line,#dcdfe2)); }
+  .b-net{ font-size:15px; font-weight:600; color:var(--text,var(--ink,#1a1b1d)); opacity:.9; white-space:nowrap; }
+  .b-pag{ font-size:14px; font-weight:500; color:var(--muted,#5f6368); white-space:nowrap; margin-left:2px; }
+  /* ════════ MENU ENTRE TELAS ════════
+     Mesmo bloco em todas as telas; em cada uma, class="ativa" na própria. */
+  .cc-nav{ position:sticky; top:0; z-index:60; width:100%; flex:0 0 auto; display:flex; gap:6px;
+          padding:9px 12px; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none;
+          background:var(--surface,var(--card,#fff));
+          border-bottom:1px solid var(--border,var(--line,#e2e4e7)); }
+  .cc-nav::-webkit-scrollbar{ display:none; }
+  .cc-nav a{ flex:none; font-size:13px; font-weight:600; color:var(--muted,#5f6368);
+             text-decoration:none; padding:8px 14px; border-radius:999px;
+             border:1px solid transparent; white-space:nowrap; }
+  .cc-nav a:hover{ color:var(--text,var(--ink,#1a1b1d)); }
+  .cc-nav a.ativa{ background:#c6082f; border-color:#c6082f; color:#fff; }
+</style>
+</head>
+<body>
+
+<nav class="cc-nav" aria-label="Telas">
+  <a href="index.html">Mensagens</a>
+  <a href="tarifas.html" class="ativa">Tarifas</a>
+  <a href="cadastro.html">Cadastro</a>
+  <a href="cadastro_novo.html">Cadastro novo</a>
+  <a href="#" class="sair" id="btnSair">Sair</a>
+</nav>
+
+<div class="wrap">
+  <header class="top">
+    <h1><span class="marca"><img class="brinco" src="img/net.png" alt="" srcset=""><span class="b-word">bradesco</span><span class="b-sep"></span><span class="b-net">Net&nbsp;Empresa</span><span class="b-pag">· Tarifas</span></span></h1>
+    <button class="theme-btn" id="themeBtn" type="button">Tema</button>
+  </header>
+  <p class="sub">Preencha os dados da conta e as tarifas que deseja isentar. A tela ao lado simula a requisição interna do sistema Bradesco.</p>
+
+  <div class="grid">
+    <section class="panel" aria-label="Painel de solicitação">
+      <h2>Painel de Solicitação</h2>
+      <form id="form" autocomplete="off">
+        <fieldset>
+          <legend>Dados da Conta</legend>
+          <div class="row c2">
+            <div class="f"><label for="matricula">Matrícula</label><input id="matricula" value="C576967"></div>
+            <div class="f"><label for="datahora">Data / hora</label><input id="datahora" value="2025" placeholder="dd/mm/2025 hh:mm"></div>
+          </div>
+          <div class="row c3">
+            <div class="f"><label for="ag">Agência</label><input id="ag" value="1089"></div>
+            <div class="f"><label for="produto">Produto</label><input id="produto" value="1292"></div>
+            <div class="f"><label for="pag">Página</label><input id="pag" value="001"></div>
+          </div>
+          <div class="row c2"><div class="f span2"><label for="conta">Conta</label><input id="conta" value="000000000000 - 0"></div></div>
+          <div class="row c2">
+            <div class="f span2"><label for="nome">Razão Social</label><input id="nome" value="EMPRESA EXEMPLO LTDA"></div>
+            <div class="f span2"><label for="doc">CNPJ</label><input id="doc" value="00.000.000/0001-00"></div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Configuração de Isenções</legend>
+          <div class="row c2">
+            <div class="f">
+              <label for="tarifa_tipo">Tipo de Tarifa / Serviço</label>
+              <select id="tarifa_tipo">
+                <option>MANUTENÇÃO DE CONTA</option>
+                <option>PACOTE DE DOCS/TED</option>
+                <option>TARIFA DE EMISSÃO BOLETO</option>
+                <option>TAXA DE ADESÃO NET EMPRESA</option>
+                <option>TARIFA DE CONSULTA SALDO</option>
+                <option>ISENÇÃO TOTAL (PACOTE FULL)</option>
+              </select>
+            </div>
+            <div class="f">
+              <label for="percentual">Percentual de Isenção</label>
+              <select id="percentual">
+                <option>100% (TOTAL)</option>
+                <option>50% (PARCIAL)</option>
+                <option>25% (PARCIAL)</option>
+                <option>10% (REDUÇÃO)</option>
+              </select>
+            </div>
+          </div>
+          <div class="row c2">
+            <div class="f span2">
+              <label for="justificativa">Justificativa da Isenção</label>
+              <textarea id="justificativa" placeholder="Ex: Cliente com alto volume de movimentação, fidelização de conta..."></textarea>
+            </div>
+          </div>
+          <div class="row c2">
+            <div class="f">
+              <label for="prazo">Prazo da Isenção</label>
+              <select id="prazo">
+                <option>INDETERMINADO</option>
+                <option>12 MESES</option>
+                <option>6 MESES</option>
+                <option>3 MESES</option>
+              </select>
+            </div>
+            <div class="f">
+              <label for="status_ped">Status do Pedido</label>
+              <select id="status_ped">
+                <option>AGUARDANDO ANÁLISE</option>
+                <option>APROVADO</option>
+                <option>PENDENTE GERÊNCIA</option>
+                <option>REJEITADO</option>
+              </select>
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="btns">
+          <button class="btn" id="limpar" type="button">Limpar campos</button>
+        </div>
+        <p class="hint">Tire um print da tela ao lado para anexar ao processo de isenção.</p>
+      </form>
+    </section>
+
+    <section aria-label="Tela do sistema">
+      <div class="screenwrap">
+        <div class="screen" id="screen">
+          <div class="split"><span class="lbl">MATRICULA: <span class="val" id="s_matricula"></span></span><span class="wt" id="s_datahora"></span></div>
+          <div class="split"><span class="lbl">#SOLICITACAO_ISENCAO</span><span class="wt">#SISTEMA INTERNO</span></div>
+          <div class="rule">------------------------------------------------------------------</div>
+          <div class="cols4">
+            <span class="lbl">AG: <span class="val" id="s_ag"></span></span>
+            <span class="lbl">PRODUTO: <span class="val" id="s_produto"></span></span>
+            <span class="lbl">CONTA: <span class="val" id="s_conta"></span></span>
+            <span class="lbl">PAG: <span class="val" id="s_pag"></span></span>
+          </div>
+          <div class="split"><span class="lbl">NOME: <span class="val" id="s_nome"></span></span><span class="lbl">CNPJ: <span class="val" id="s_doc"></span></span></div>
+          <div class="rule" style="color:#123">&nbsp;</div>
+          
+          <div class="tl"><span class="lbl">DETALHES DA SOLICITAÇÃO:</span></div>
+          <div class="tl"><span class="lbl">SERVIÇO: <span class="hi" id="s_tarifa_tipo"></span></span></div>
+          <div class="tl"><span class="lbl">ISENÇÃO APLICADA: <span class="val" id="s_percentual"></span></span></div>
+          <div class="tl"><span class="lbl">VIGÊNCIA: <span class="val" id="s_prazo"></span></span></div>
+          <div class="tl"><span class="lbl">STATUS: <span class="red" id="s_status_ped"></span></span></div>
+          
+          <div class="rule" style="color:#123">&nbsp;</div>
+          <div class="tl"><span class="lbl">JUSTIFICATIVA TÉCNICA:</span></div>
+          <div class="tl" id="s_justificativa" style="color:var(--t-white); margin-bottom:10px;"></div>
+          
+          <div class="rule" style="color:#123">&nbsp;</div>
+          <div class="tl"><span class="lbl">OBSERVAÇÕES: <span class="val">SOLICITAÇÃO VIA NET EMPRESA - PRIORIDADE ALTA</span></span></div>
+          
+          <div class="rule">------------------------------------------------------------------</div>
+          <div class="lbl" style="margin-top:2px">PROCESSANDO PEDIDO <span class="cur">_</span></div>
+          <div class="rule">------------------------------------------------------------------</div>
+          <div class="fkeys">
+            <span>F01 - AJUDA</span><span>F03 - RETORNAR</span><span>F04 - MENU PRINCIPAL</span><span>F05 - DETALHE</span>
+            <span>F07 - VOLTAR PAG.</span><span>F08 - AVANCAR PAG.</span><span>F12 - ENCERRAR</span><span>ENTER - PROSSEGUIR</span>
+          </div>
+          <div class="rule">------------------------------------------------------------------</div>
+        </div>
+        <div class="scr-actions">
+          <button class="btn primary" id="copy" type="button">Copiar tela (texto)</button>
+          <span class="toast" id="toast" hidden>Copiado!</span>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script src="js/common.js"></script>
+<script>
+BN.garanteLogin();
+(function(){
+  "use strict";
+  var textFields = [
+    "matricula","ag","produto","pag","conta","nome","doc","datahora",
+    "tarifa_tipo","percentual","justificativa","prazo","status_ped"
+  ];
+  var STORE = "netempresa_isencao_v1";
+  function $(id){ return document.getElementById(id); }
+  function up(s){ return (s||"").toUpperCase(); }
+
+    function saveDraft(){ try{ var d={}; textFields.forEach(function(f){ d[f]=$(f).value; }); localStorage.setItem(STORE, JSON.stringify(d)); }catch(e){} }
+    function loadDraft(){ try{ var raw=localStorage.getItem(STORE); if(!raw) return; var d=JSON.parse(raw);
+      textFields.forEach(function(f){ if(typeof d[f]==="string") $(f).value=d[f]; }); }catch(e){} }
+
+  function setVal(id,v,upper){ var el=$("s_"+id); var t=upper===false?(v||""):up(v);
+    if(t&&t.trim()){ el.textContent=t; el.className=el.className.replace(" empty",""); }
+    else { el.textContent="—"; if(el.className.indexOf("empty")<0) el.className+=" empty"; } }
+
+  function renderScreen(){
+    textFields.forEach(function(f){
+      if(f==="datahora"){ $("s_datahora").textContent=$(f).value; return; }
+      if(f==="justificativa"){ $("s_justificativa").textContent=up($(f).value) || "—"; return; }
+      setVal(f,$(f).value);
+    });
+  }
+
+  function init(){
+    loadDraft();
+    renderScreen();
+    textFields.forEach(function(f){
+      $(f).addEventListener("input", function(){
+        renderScreen();
+        saveDraft();
+      });
+    });
+    $("limpar").onclick = function(){
+      textFields.forEach(function(f){ $(f).value=""; });
+      renderScreen();
+        try { localStorage.removeItem(STORE); } catch(e){}
+    };
+    $("copy").onclick = function(){
+      var text = $("screen").innerText;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function(){
+          var t=$("toast"); t.hidden=false; setTimeout(function(){t.hidden=true;}, 2000);
+        }).catch(function() {
+          fallbackCopy(text);
+        });
+      } else {
+        fallbackCopy(text);
+      }
+    };
+
+    function fallbackCopy(text) {
+      var textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      textArea.style.left = "-9999px";
+      textArea.style.top = "0";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try { document.execCommand('copy'); } catch (err) {}
+      textArea.remove();
+      var t=$("toast"); t.hidden=false; setTimeout(function(){t.hidden=true;}, 2000);
+    }
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bradesco Net Empresa · Acesso</title>
+<link rel="shortcut icon" href="https://banco.bradesco/assets/pessoajuridica/img/favicon.ico" type="image/x-icon">
+<link rel="stylesheet" href="css/theme.css">
+</head>
+<body>
+
+<div class="login-root">
+  <div class="login-card">
+    <div class="login-head">
+      <span class="marca">
+        <img class="brinco" src="img/net.png" alt="">
+        <span class="b-word">bradesco</span><span class="b-sep"></span><span class="b-net">Net&nbsp;Empresa</span>
+      </span>
+      <h1>Acesso ao sistema</h1>
+      <p>Entre com suas credenciais para continuar</p>
+    </div>
+
+    <form class="login-form" id="formLogin" autocomplete="off">
+      <div class="f">
+        <label for="usuario">Usuário</label>
+        <input id="usuario" type="text" autocomplete="username" placeholder="Digite seu usuário" autofocus>
+      </div>
+      <div class="f">
+        <label for="senha">Senha</label>
+        <input id="senha" type="password" autocomplete="current-password" placeholder="Digite sua senha">
+      </div>
+      <button class="btn primary" type="submit" style="width:100%">Entrar</button>
+      <p class="login-error" id="erro" role="status"></p>
+    </form>
+
+    <p class="login-foot">Acesso interno dos atendentes. Seus dados ficam neste navegador.</p>
+  </div>
+</div>
+
+<script src="js/common.js"></script>
+<script>
+(function(){
+  var form = document.getElementById("formLogin");
+  var erro = document.getElementById("erro");
+  function tentar(){
+    var u = document.getElementById("usuario").value;
+    var s = document.getElementById("senha").value;
+    if (BN.autenticar(u, s)) {
+      erro.textContent = "";
+      window.location.href = "index.html";
+    } else {
+      erro.innerHTML = '<span class="login-err-pwd">Usuário ou senha incorretos</span>';
+      document.getElementById("senha").focus();
+    }
+  }
+  form.addEventListener("submit", function(e){ e.preventDefault(); tentar(); });
+  document.getElementById("senha").addEventListener("keydown", function(e){
+    if (e.key === "Enter") { e.preventDefault(); tentar(); }
+  });
+})();
+</script>
+</body>
+</html>

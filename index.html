@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Bradesco Net Empresa · Central de Mensagens</title>
+<link rel="shortcut icon" href="https://banco.bradesco/assets/pessoajuridica/img/favicon.ico" type="image/x-icon">
+<link rel="stylesheet" href="css/theme.css">
+<style>
+  /* ============ MOBILE FIRST ============ */
+  :root{
+    --bg:#e3edf7; --card:#ffffff; --card2:#f6f7f8; --linha:#dcdee1;
+    --texto:#808387; --suave:#245189; --prim:#c6082f;
+    --ok:#0a7d3b; --raio:14px; --b-red:#c6082f;
+  }
+  #painel{background: #fff;}
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#e3edf7; --card:#d1d2d5; --card2:#ebecf1; --linha:#070707;
+           --texto:#070707; --suave:#1a68b5; --prim:#e04a63;
+           --ok:#3ddc84; --b-red:#ff5f78; }
+  }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body{ margin:0; background:var(--bg); color:var(--texto);
+        font-family:-apple-system,"Segoe UI",Roboto,Ubuntu,sans-serif;
+        display:flex; flex-direction:column; align-items:center; min-height:100vh; }
+  .app{ width:100%; max-width:480px; padding:14px 14px 90px; }
+
+  header{ display:flex; align-items:center; gap:12px; padding:8px 2px 14px; }
+  .linha-marca{ margin:0; }
+  header h1.pagina{ font-size:14px; margin:0; line-height:1.2; color:var(--suave); font-weight:600; }
+  header small{ color:var(--suave); font-weight:400; display:block; font-size:12px; }
+
+  .card{ background:var(--card); border:1px solid var(--linha);
+         border-radius:var(--raio); padding:14px; margin-bottom:14px; }
+  .card h2{ font-size:13px; text-transform:uppercase; letter-spacing:.06em;
+            color:var(--suave); margin:0 0 10px; }
+
+  /* Campos de nome */
+  .campos{ display:grid; gap:10px; }
+  .campo label{ display:block; font-size:12px; color:var(--suave);
+                margin:0 2px 5px; font-weight:600; }
+  .campo input{ width:100%; font-size:18px; padding:14px; border-radius:12px;
+                border:1px solid var(--linha); background:var(--card2);
+                color:var(--texto); outline:none; }
+  .campo input:focus{ border-color:var(--prim); }
+
+  /* Lista de títulos */
+  .titulos{ display:grid; gap:8px; }
+  .grupo{ font-size:11px; text-transform:uppercase; letter-spacing:.08em;
+          color:var(--suave); font-weight:700; margin:12px 2px 4px; }
+  .grupo:first-child{ margin-top:0; }
+  .titulo{ display:flex; align-items:center; gap:10px; width:100%; text-align:left;
+           font-size:15px; padding:13px 14px; border-radius:12px; cursor:pointer;
+           border:1px solid var(--linha); background:var(--card2); color:var(--texto); }
+  .titulo .num{ width:26px; height:26px; border-radius:8px; flex:none;
+                background:var(--card); border:1px solid var(--linha);
+                display:grid; place-items:center; font-size:12px; color:var(--suave); }
+  .titulo.ativa{ border-color:var(--prim); background:color-mix(in srgb,var(--prim) 15%, var(--card2)); }
+  .titulo.ativa .num{ background:var(--prim); color:#0b1220; border-color:var(--prim); font-weight:700; }
+
+  /* Painel da mensagem */
+  textarea{ width:100%; min-height:170px; resize:vertical; font-size:16px; line-height:1.5;
+            padding:14px; border-radius:12px; border:1px solid var(--linha);
+            background:var(--card2); color:var(--texto); outline:none; font-family:inherit; }
+  textarea:focus{ border-color:var(--prim); }
+
+  .acoes{ display:flex; gap:10px; margin-top:10px; }
+  .btn{ flex:1; font-size:16px; font-weight:700; padding:15px; border-radius:12px;
+        border:none; cursor:pointer; transition:transform .06s, opacity .2s; }
+  .btn:active{ transform:scale(.97); }
+  .btn-copiar{ background:var(--prim); color:#fff; }
+  .btn-copiar.copiado{ background:var(--ok); color:#fff; }
+  .btn-rest{ flex:0 0 auto; padding:15px 14px; background:transparent;
+             border:1px solid var(--linha); color:var(--suave); font-weight:600; }
+
+  .rodape{ text-align:center; color:var(--suave); font-size:12px; margin-top:4px; }
+
+  /* ============ DESDE TABLET CIMA ============ */
+  @media (min-width:640px){
+    .app{ padding-top:28px; }
+    .campos{ grid-template-columns:1fr 1fr; }
+    textarea{ min-height:220px; }
+    .cc-nav{ height:60px;}
+  }
+  /* ============ DESDE DESKTOP CIMA: painel FIXO, lista com scroll interno ============ */
+  @media (min-width:1024px){
+    html{ height:100%; overflow:hidden; }
+    body{ height:100%; min-height:0; padding:0; overflow:hidden; }
+    .app{ max-width:1000px; flex:1 1 auto; min-height:0; display:flex; flex-direction:column;
+          overflow:hidden; padding-top:0; padding-bottom:12px; }
+    header{ flex:none; }
+    .app-content{ flex:1 1 auto; min-height:0;
+                  display:grid; grid-template-columns:400px 1fr;
+                  grid-template-rows:auto 1fr; gap:14px; align-items:stretch; }
+    .app-content .card{ margin-bottom:0; margin-top:0; }
+    #card-campos { grid-column:1; grid-row:1; flex:none; }
+    #card-painel { grid-column:2; grid-row:1 / span 2; min-height:0;
+                   display:flex; flex-direction:column; }
+    #card-painel textarea{ flex:1 1 auto; min-height:0; resize:none; }
+    #card-titulos{ grid-column:1; grid-row:2; min-height:0;
+                  display:flex; flex-direction:column; }
+    #card-titulos .titulos{ flex:1 1 auto; min-height:0; overflow-y:auto; padding-right:2px; }
+    .rodape{ flex:none; margin-top:10px; }
+  }
+  /* ════════ IDENTIDADE BRADESCO NET EMPRESA ════════
+     Troque o SVG .brinco por um <img> do logotipo oficial quando tiver
+     o arquivo (mantendo a classe .brinco). */
+  .marca{ display:inline-flex; align-items:center; gap:9px; }
+  .brinco{ width:30px; height:30px; color:var(--b-red,#c6082f); flex:none; display:block; }
+  .b-word{ font-size:20px; font-weight:800; letter-spacing:-.02em; color:var(--b-red,#c6082f); }
+  .b-sep{ width:1.5px; height:20px; background:var(--border,var(--line,#dcdfe2)); }
+  .b-net{ font-size:15px; font-weight:600; color:var(--text,var(--ink,#1a1b1d)); opacity:.9; white-space:nowrap; }
+  .b-pag{ font-size:14px; font-weight:500; color:var(--muted,#5f6368); white-space:nowrap; margin-left:2px; }
+  /* ════════ MENU ENTRE TELAS ════════
+     Mesmo bloco em todas as telas; em cada uma, class="ativa" na própria. */
+  .cc-nav{ position:sticky; top:0; z-index:60; width:100%; height:auto; flex:0 0 auto; display:flex; gap:10px;
+          padding:9px 12px; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none;
+          background:var(--surface,var(--card,#fff));
+          border-bottom:1px solid var(--border,var(--line,#e2e4e7)); }
+  .cc-nav::-webkit-scrollbar{ display:none; }
+  .cc-nav a{ flex:none; font-size:13px; font-weight:600; color:var(--muted,#5f6368);
+             text-decoration:none; padding:8px 14px; border-radius:999px;
+             border:1px solid transparent; white-space:nowrap; }
+  .cc-nav a:hover{ color:var(--text,var(--ink,#1a1b1d)); }
+  .cc-nav a.ativa{ background:#c6082f; border-color:#c6082f; color:#fff; }
+</style>
+</head>
+<body>
+
+<!-- ══════════ MENU ENTRE TELAS ══════════
+     Nas outras telas, cole este <nav> inteiro logo após o <body> e mova a
+     classe "ativa" para a opção da própria tela.
+     (Se o arquivo se chamar "tarifas.html", ajuste o link abaixo.) -->
+<nav class="cc-nav">
+  <a href="index.html" class="ativa">Mensagens</a>
+  <a href="tarifas.html">Tarifas</a>
+  <a href="cadastro.html">Cadastro</a>
+  <a href="cadastro_novo.html">Cadastro novo</a>
+  <a href="#" class="sair" id="btnSair">Sair</a>
+</nav>
+
+<div class="app">
+
+  <header>
+    <div class="linha-marca"><span class="marca"><img class="brinco" src="img/net.png" alt="" srcset=""><span class="b-word">bradesco</span><span class="b-sep"></span><span class="b-net">Net&nbsp;Empresa</span></span></div>
+    <h1 class="pagina">Central de Mensagens <small id="hora-atual"></small></h1>
+    <button class="theme-btn" id="themeBtn" type="button">Tema</button>
+  </header>
+
+  <div class="app-content">
+
+    <!-- Nomes -->
+    <section class="card" id="card-campos">
+      <h2>Dados do atendimento</h2>
+      <div class="campos">
+        <div class="campo">
+          <label for="nome-cliente">Cliente → {NOME_CLIENTE}</label>
+          <input id="nome-cliente" type="text" autocomplete="off"
+                 placeholder="Ex.: Camila">
+        </div>
+        <div class="campo">
+          <label for="nome-gerente">Gerente → {NOME_GERENTE}</label>
+          <input id="nome-gerente" type="text" autocomplete="off"
+                 placeholder="Ex.: André Raponi">
+        </div>
+        <div class="campo">
+          <label for="empresa">Empresa → {EMPRESA}</label>
+          <input id="empresa" type="text" autocomplete="off"
+                 placeholder="Ex.: Construtora Silva Ltda">
+        </div>
+        <div class="campo">
+          <label for="conta">Conta → {CONTA}</label>
+          <input id="conta" type="text" autocomplete="off"
+                 placeholder="Ex.: 1234-5">
+        </div>
+      </div>
+    </section>
+
+    <!-- Painel editável (ANTES da lista no mobile) -->
+    <section class="card" id="card-painel">
+      <h2>Painel <span style="font-weight:400;text-transform:none">(pode editar)</span></h2>
+      <textarea id="painel" spellcheck="false" placeholder="Selecione uma mensagem abaixo…"></textarea>
+      <div class="acoes">
+        <button class="btn btn-rest" id="btn-restaurar" title="Volta a mensagem original">↺</button>
+        <button class="btn btn-copiar" id="btn-copiar">📋 Copiar</button>
+      </div>
+    </section>
+
+    <!-- Títulos das mensagens -->
+    <section class="card" id="card-titulos">
+      <h2>Mensagens</h2>
+      <div id="lista-titulos" class="titulos"></div>
+    </section>
+
+  </div>
+
+  <p class="rodape" id="rodape"></p>
+</div>
+
+<script src="js/common.js"></script>
+<script>
+BN.garanteLogin(); BN.initTema(); BN.logoutNoNav();
+/* ════════════════════════════════════════════════════════════════════
+   COMO INCLUIR NOVAS MENSAGENS
+   ────────────────────────────────────────────────────────────────────
+   1. No array MENSAGENS abaixo, copie um bloco
+      { titulo: …, mensagem: … } e cole perto das mensagens do mesmo
+      assunto (elas estão organizadas em grupos).
+
+   2. O "titulo" é o que aparece no menu. O "mensagem" é o texto que
+      sai no painel, com as chaves já trocadas.
+
+   3. Opcional: use a propriedade "grupo: "Nome do grupo"" para criar
+      uma separação com rótulo na lista. Não repita o grupo na primeira
+      mensagem de cada bloco — um "grupo" por bloco já separa tudo.
+
+   EXEMPLO:
+   {
+     grupo: "Crédito",
+     titulo: "Proposta de empréstimo",
+     mensagem: "{SAUDACAO}, {NOME_CLIENTE}. Consegue ficar com o computador? Quero verificar uma proposta para você."
+   }
+
+   CHAVES DISPONÍVEIS (preenchidas sozinhas, sem digitar nada):
+     {SAUDACAO}      → "Bom dia" (5h–12h) · "Boa tarde" (12h–18h) · "Boa noite" (18h–5h)
+     {DIA}           → "Segunda-feira", "Terça-feira", … conforme a data
+     {NOME_CLIENTE}  → campo "Cliente"; se estiver vazio, vira "cliente"
+     {NOME_GERENTE}  → campo "Gerente" (nome do gerente anterior nos grupos
+                       de rotatividade); se estiver vazio, a chave fica
+                       visível no texto para lembrar de preencher
+     {EMPRESA}       → campo "Empresa"; vazio → chave visível no texto
+     {CONTA}         → campo "Conta"; vazio → chave visível no texto
+     {NOME}          → aceita como sinônimo de {NOME_CLIENTE} (mensagens antigas)
+
+   QUERER MAIS CHAVES? Ex.: {CIDADE}:
+     • na mensagem, escreva onde a chave deve vir: "…em {CIDADE}…"
+     • no objeto CAMPOS_EXTRA abaixo, adicione: CIDADE: "São Paulo"
+       e pronto — a função aplicarChaves() troca automaticamente.
+
+   ORDEM DA LISTA: os grupos seguem a ordem dos blocos em MENSAGENS,
+   então para mover/reordenar, mova os blocos inteiros.
+   ════════════════════════════════════════════════════════════════════ */
+
+const MENSAGENS = [
+  /* ── ABERTURA / SEXTO SENTIDO ───────────────────────────────────── */
+  {
+    grupo: "Abertura",
+    titulo: "Salvar contato",
+    mensagem: "Peço que salve meu contato. Estou à disposição para suporte, investimentos, linhas de crédito, Pronampe e outras soluções financeiras para sua empresa. Conte comigo!"
+  },
+  {
+    titulo: "Apresentação Gerente 01 (Homem)",
+    mensagem: "Olá, {NOME_CLIENTE}! Tudo bem?\nSou {NOME_GERENTE}, seu novo gerente de relacionamento PJ do Bradesco.\nA partir de agora fico responsável pela conta {CONTA} da {EMPRESA}.\nEstou à disposição para suporte, investimentos, crédito, cartões, tarifas e benefícios.\nSe achar melhor, podemos tomar um café na agência e alinhar tudo com calma.\n\nConte comigo.\nAtenciosamente, {NOME_GERENTE}\nGerente de relacionamento PJ Bradesco."
+  },
+  {
+    titulo: "Apresentação Gerente 01 (Mulher)",
+    mensagem: "Olá, {NOME_CLIENTE}! Tudo bem?\nSou {NOME_GERENTE}, sua nova gerente de relacionamento PJ do Bradesco.\nA partir de agora fico responsável pela conta {CONTA} da {EMPRESA}.\nEstou à disposição para suporte, investimentos, crédito, cartões, tarifas e benefícios.\nSe achar melhor, podemos tomar um café na agência e alinhar tudo com calma.\n\nConte comigo.\nAtenciosamente, {NOME_GERENTE}\nGerente de relacionamento PJ Bradesco."
+  },
+  {
+    titulo: "Apresentação Gerente 02 (Homem)",
+    mensagem: "{SAUDACAO}, {NOME_CLIENTE}!\n\nMeu nome é {NOME_GERENTE}, tudo bem?\n\nEstou assumindo a carteira PJ da agência e, a partir de agora, serei seu novo gerente de relacionamento no Bradesco, certo?\n\nEstou entrando em contato para me colocar à disposição para o que precisar.\n\nSe houver alguma pendência da gestão anterior, ou necessidade de liberação de crédito, ajuste na cesta de serviços, enfim, conte comigo.\n\nE claro, fica o convite: assim que possível, passe aqui na agência para tomarmos um cafezinho com a gente."
+  },
+  {
+    titulo: "Apresentação Gerente 02 (Mulher)",
+    mensagem: "{SAUDACAO}, {NOME_CLIENTE}!\n\nMeu nome é {NOME_GERENTE}, tudo bem?\n\nEstou assumindo a carteira PJ da agência e, a partir de agora, serei sua nova gerente de relacionamento no Bradesco, certo?\n\nEstou entrando em contato para me colocar à disposição para o que precisar.\n\nSe houver alguma pendência da gestão anterior, ou necessidade de liberação de crédito, ajuste na cesta de serviços, enfim, conte comigo.\n\nE claro, fica o convite: assim que possível, passe aqui na agência para tomarmos um cafezinho com a gente."
+  },
+  {
+    titulo: "Acesso no PC",
+    mensagem: "{SAUDACAO}! Hoje é {DIA}, e já estou aqui na agência realizando os atendimentos. Estou entrando em contato porque temos a possibilidade de verificar alguns benefícios para a sua empresa, incluindo a redução ou isenção das tarifas do pacote empresarial que vocês pagam mensalmente.\n\nEssa redução pode gerar uma economia significativa ao longo de 2 a 3 anos, diminuindo os custos bancários da empresa.\n\nVocê está com acesso ao computador, tablet ou notebook neste momento? Assim, podemos verificar a possibilidade de realizar o procedimento por telefone, com o atendimento da agência, e conferir quais benefícios estão disponíveis para a sua conta."
+  },
+  {
+    titulo: "Atendimentos na agência",
+    mensagem: "{SAUDACAO}! Já estou fazendo alguns atendimentos na agência. Se você tiver disponibilidade durante o dia, consigo fazer a inclusão dos benefícios e deixar gratuita a tarifa mensal do pacote de serviços da conta, aquela cobrança mensal.\n\nAssim, em vez de ficar pagando essa tarifa, conseguimos direcionar esse valor para uma opção que possa gerar rentabilidade. Se tiver um momento que não atrapalhe sua rotina, me avisa pelo WhatsApp que alinhamos o atendimento."
+  },
+  {
+    titulo: "Cesta de serviços gratuita",
+    mensagem: "{SAUDACAO}! Hoje é {DIA}, e já estou aqui na agência.\n\nQueria verificar se vocês têm alguns minutinhos hoje, em algum momento que não atrapalhe a rotina, para a gente finalizar a inclusão dos benefícios na conta.\n\nVou deixar a cesta de serviços empresariais gratuita, o que gera uma economia nas tarifas da conta, e também deixar a empresa elegível às linhas de crédito, como Pronampe, capital de giro e cheque especial.\n\nQuando vocês tiverem um tempinho e estiverem com acesso ao computador, me avisem por aqui que a gente já finaliza."
+  },
+
+  /* ── ISENÇÃO DE TARIFA ──────────────────────────────────────────── */
+  {
+    grupo: "Isenção de tarifa",
+    titulo: "Isenção de tarifa",
+    mensagem: "Atualmente, você já possui a isenção da tarifa do pacote de serviços da empresa?\n\nConsigo verificar a possibilidade de deixar esse pacote isento, eliminando a cobrança mensal e gerando uma economia para a empresa ao longo do período."
+  },
+  {
+    titulo: "Isenção + benefícios",
+    mensagem: "Estou fazendo a revisão dos benefícios da conta e consigo verificar a isenção da tarifa mensal do pacote de serviços, além das demais vinculações disponíveis para a empresa.\n\nSe você estiver com acesso ao computador, tablet ou notebook, consigo alinhar o atendimento e fazer as validações necessárias."
+  },
+  {
+    titulo: "Mensagem usando a economia",
+    mensagem: "Hoje a tarifa do pacote está em *R$ 182* por mês. Se conseguirmos deixar essa cobrança isenta, a empresa deixa de pagar esse valor mensal.\n\nOs valores se acumulam: em 12 meses, economia de *R$ 2.184*; em 24 meses, *R$ 4.368*; em 36 meses, *R$ 6.552*; e em 48 meses, *R$ 8.736*."
+  },
+  {
+    titulo: "Inclusão da isenção",
+    mensagem: "{SAUDACAO}! Caso você tenha disponibilidade em algum momento durante o dia, eu consigo fazer a inclusão da isenção das tarifas e deixar aquele pacote de serviços gratuito na conta, gerando uma economia para você.\n\nSe tiver um horário disponível e estiver com acesso ao computador, tablet ou notebook, a gente consegue fazer a inclusão dos benefícios e deixar tudo vinculado à conta para você não precisar continuar pagando atualmente essas tarifas do pacote de serviços."
+  },
+  {
+    titulo: "Explicação da isenção",
+    mensagem: "Essa isenção da tarifa que é cobrada mensalmente pode gerar uma economia bem interessante para a empresa. Em 12, 24 ou 36 meses, esse valor que deixaria de ser pago pode acabar formando uma economia acumulada, funcionando como um recurso a mais no caixa da empresa.\n\nEm vez de continuar pagando essa tarifa todos os meses, você deixa esse dinheiro dentro da própria empresa e pode utilizar conforme a necessidade."
+  },
+  {
+    titulo: "Isenção de tarifas (explicação)",
+    mensagem: "Funciona assim: eu consigo verificar as opções de isenção de tarifas disponíveis para a sua conta PJ, tanto em relação à cesta de serviços quanto a outras tarifas, conforme as condições da conta.\n\nA ideia é analisar o seu perfil e verificar quais benefícios conseguimos liberar para reduzir ou até eliminar determinados custos. Se você estiver com acesso ao notebook ou tablet, podemos fazer essa análise e dar continuidade ao procedimento de forma remota, sem precisar vir à agência."
+  },
+  {
+    titulo: "Inclusão da cesta de serviços",
+    mensagem: "Sim, nesse caso eu consigo verificar a inclusão da cesta de serviços e, se estiver disponível para a conta, deixar o pacote sem cobrança, gerando uma economia ao longo de 12, 24 ou 36 meses.\n\nVocê teria acesso a um computador, tablet ou notebook? Assim, a gente consegue te ligar da agência e fazer o procedimento de forma online, sem precisar se deslocar."
+  },
+
+  /* ── INVESTIMENTOS E CRÉDITO ────────────────────────────────────── */
+  {
+    grupo: "Investimentos e crédito",
+    titulo: "Investimentos",
+    mensagem: "{SAUDACAO}! Tudo bem?\n\nQueria verificar com você se existe interesse em fazer alguma aplicação, como LCI, ou até mesmo organizar melhor os recursos da empresa para buscar maior rentabilidade.\n\nTambém consigo verificar a isenção das tarifas das contas e, caso exista alguma cobrança de anuidade de cartão de débito ou crédito, verificar se há possibilidade de isenção, aproveitando o bom relacionamento que a empresa já possui com o banco.\n\nVocê teria algum momento durante a semana em que possa ficar com acesso ao computador, tablet ou notebook? Assim consigo alinhar o atendimento e verificar as linhas de crédito e os demais benefícios disponíveis para a empresa."
+  },
+  {
+    titulo: "Obter capital/movimentação",
+    mensagem: "Para eu conseguir analisar melhor as possibilidades de crédito para a empresa, você consegue me informar qual foi a movimentação média da empresa nos últimos meses? Com essas informações, consigo verificar as condições disponíveis e a possibilidade de liberar algum limite para vocês."
+  },
+  {
+    titulo: "Aumento de limite",
+    mensagem: "{SAUDACAO}! Você está com acesso ao computador, tablet ou notebook? Se estiver, eu já consigo te ligar aqui da agência, verificar o aumento do limite de boletos e também fazer a revisão da tarifa para deixar o pacote gratuito, gerando uma economia para a empresa no longo prazo."
+  },
+  {
+    titulo: "Aumento de cheque especial",
+    mensagem: "Temos também a possibilidade de verificar o aumento do limite do cheque especial, caso já esteja ativo na conta, ou consultar a disponibilidade de contratação, com a possibilidade de até 10 dias sem juros, conforme as condições do produto.\n\nAlém disso, podemos consultar as opções de crédito para sua empresa, incluindo Pronampe e capital de giro.\n\nVocê teria disponibilidade e acesso ao computador, tablet ou notebook para conversarmos e verificarmos quais opções estão disponíveis para a sua empresa?"
+  },
+  {
+    titulo: "Avaliar cenário da empresa",
+    mensagem: "Dessa forma, consigo avaliar melhor o cenário da sua empresa, verificar as possibilidades de melhorias e também analisar a possibilidade de aumento dos seus limites, de acordo com as necessidades do negócio."
+  },
+
+  /* ── CHATNET ────────────────────────────────────────────────────── */
+  {
+    grupo: "ChatNet",
+    titulo: "ChatNet Convite",
+    mensagem: "{SAUDACAO}! Queria te convidar para fazer a ativação do ChatNet Empresa, que deixa o atendimento da sua empresa mais personalizado e prático pelo aplicativo.\n\nCom a ativação, você passa a ter um canal de atendimento diferenciado com o gerente, além de poder acompanhar pelo aplicativo assuntos como investimentos, LCI, linhas de crédito, consórcios, seguros e outros benefícios que estiverem disponíveis para a empresa. Você também consegue receber as comunicações de campanhas e oportunidades do banco e, quando precisar de atendimento na agência, pode entrar em contato pelo próprio aplicativo para verificar a melhor forma de atendimento.\n\nÉ uma forma de facilitar bastante o dia a dia da empresa, principalmente com a evolução dos atendimentos digitais.\n\nVocê teria alguns minutos disponíveis durante a semana, em um horário que não atrapalhe seus compromissos e sua rotina, para fazermos essa ativação e verificarmos os benefícios disponíveis para a sua empresa?"
+  },
+  {
+    titulo: "ChatNet Verificar",
+    mensagem: "{SAUDACAO}! Queria verificar com você a ativação do ChatNet Empresa, que deixa o atendimento da sua empresa mais personalizado e prático pelo aplicativo, com acesso ao gerente e acompanhamento de investimentos, LCI, linhas de crédito e outros benefícios disponíveis.\n\nVocê teria alguns minutos durante a semana, em um horário que não atrapalhe sua rotina, para fazermos essa ativação e já verificarmos os benefícios para a empresa?"
+  },
+  {
+    titulo: "Habilitação do ChatNet Empresa",
+    mensagem: "Para fazer a habilitação do ChatNet Empresa e deixar o acesso funcionando corretamente, você consegue ficar com o computador, tablet ou notebook disponível nesse momento?\n\nSe estiver com acesso, eu já alinho o atendimento com a minha assistente e fazemos as validações necessárias para deixar tudo habilitado."
+  },
+  {
+    titulo: "Modelo do aparelho",
+    mensagem: "Para eu verificar a versão compatível com o seu dispositivo e já deixar tudo certinho para fazer a inclusão dos benefícios, qual é a marca do aparelho que você utiliza atualmente? Você utiliza iPhone (iOS) ou Android?\n\nCom essa informação eu já verifico a versão atualizada e te passo o procedimento correto para dar andamento."
+  },
+  {
+    titulo: "2 dispositivos p/ ativação",
+    mensagem: "Para fazer essa ativação pelo celular, precisamos de um segundo aparelho somente durante o processo de habilitação. Pode ser o celular do esposo, esposa, filho, sobrinho, mãe, pai ou alguém de confiança.\n\nÉ só durante a ativação. Depois que finalizar, não será necessário continuar utilizando o outro aparelho."
+  },
+  {
+    titulo: "Segundo aparelho (dúvida)",
+    mensagem: "Não, o segundo aparelho será utilizado somente para fazer a validação. Depois disso, não será mais necessário utilizá-lo.\n\nApós a validação, você continua utilizando normalmente o aparelho que já está acostumado a usar."
+  },
+
+  /* ── ACESSO AO COMPUTADOR / ATENDIMENTO ONLINE ─────────────────── */
+  {
+    grupo: "Acesso ao computador",
+    titulo: "Acesso ao computador",
+    mensagem: "Você está com acesso ao computador, tablet ou notebook nesse momento? Se estiver, consigo alinhar o atendimento agora para fazer as configurações e deixar o acesso da empresa funcionando corretamente."
+  },
+  {
+    titulo: "Acesso ao PC 02",
+    mensagem: "Você está com acesso ao computador, tablet ou notebook nesse momento? Se estiver, consigo te ajudar a verificar essa questão da tarifa e também qualquer outra demanda que você esteja precisando, como boleto, prestação, contrato ou alguma informação da conta.\n\nComo sou o gerente da sua conta, consigo acompanhar a situação com você e verificar o que for necessário. Se estiver com o computador ou notebook em mãos, já podemos resolver isso agora."
+  },
+  {
+    titulo: "Resolver Online",
+    mensagem: "Eu consigo resolver isso de forma online, para você não precisar se deslocar, perder tempo ou atrapalhar sua agenda e seus compromissos.\n\nVocê teria acesso a um computador, tablet ou notebook? Se tiver, eu consigo te ligar da agência e já damos andamento por aqui."
+  },
+  {
+    titulo: "Propor ligação",
+    mensagem: "Se você estiver com acesso ao computador, tablet ou notebook, eu já consigo fazer o atendimento. Te ligo da agência e a gente já finaliza a inclusão desses benefícios na conta, tudo bem?"
+  },
+  {
+    titulo: "Verificar demandas",
+    mensagem: "Você está com acesso ao computador, tablet ou notebook neste momento? Assim, já consigo te ligar da agência para agilizar essas demandas, verificar a inclusão dos benefícios disponíveis, revisar as tarifas e a cesta de serviços, além de consultar as opções de linhas de crédito para a sua empresa."
+  },
+  {
+    titulo: "Direcionar atendimento",
+    mensagem: "Assim que você salvar o contato da agência, me dá um OK por aqui que eu já direciono o atendimento."
+  },
+
+  /* ── SITUAÇÃO DA EMPRESA ────────────────────────────────────────── */
+  {
+    grupo: "Situação da empresa",
+    titulo: "Situação da empresa?",
+    mensagem: "Atualmente, como está a situação da empresa e da conta? Vocês ainda utilizam essa conta no dia a dia ou ela não está mais sendo movimentada?\n\nAinda existe algum faturamento médio nesse CNPJ? A conta continua ativa e vocês têm acesso ao aplicativo, ou já solicitaram o encerramento?\n\nMe passe só essas informações para eu entender a situação atual e verificar aqui as condições e os benefícios que podem estar disponíveis para a empresa."
+  },
+
+  /* ── ROTATIVIDADE DE GERENTES ──────────────────────────────────── */
+  /* Nas mensagens deste grupo, {NOME_GERENTE} é o nome do gerente anterior. */
+  {
+    grupo: "Rotatividade de gerentes",
+    titulo: "Gerente antiga (Mulher)",
+    mensagem: "Ela não saiu do Bradesco, não. Atualmente ela está atuando em outro setor. O Bradesco trabalha com uma troca de gerentes de forma rotativa, justamente para manter uma dinâmica de atendimento e relacionamento com os clientes.\n\nEu assumi a sua carteira PJ e fico à disposição para dar continuidade ao atendimento e cuidar das suas demandas da melhor forma possível."
+  },
+  {
+    titulo: "Gerente antigo (Homem)",
+    mensagem: "Ele não saiu do Bradesco, não. Atualmente ele está atuando em outro setor. O Bradesco trabalha com uma troca de gerentes de forma rotativa, justamente para manter uma dinâmica de atendimento e relacionamento com os clientes.\n\nEu assumi a sua carteira PJ e fico à disposição para dar continuidade ao atendimento e cuidar das suas demandas da melhor forma possível."
+  },
+  {
+    titulo: "Rotatividade de gerentes (Mulher)",
+    mensagem: "Como o Bradesco faz a rotatividade das carteiras, a {NOME_GERENTE} provavelmente está atendendo outra carteira de clientes. Ela pode até estar na agência, mas atualmente está responsável por outros clientes.\n\nPeço que salve meu contato, porque a partir de agora eu sou o seu novo gerente de relacionamento. Sempre que precisar, estou à disposição para suporte, investimentos, linhas de crédito e demais assuntos da sua conta.\n\nE quando estiver pela região, fica o convite para passar na agência e tomar um café. Será um prazer te atender!"
+  },
+  {
+    titulo: "Rotatividade de gerentes (Homem)",
+    mensagem: "Como o Bradesco faz a rotatividade das carteiras, o {NOME_GERENTE} provavelmente está atendendo outra carteira de clientes. Ele pode até estar na agência, mas atualmente está responsável por outros clientes.\n\nPeço que salve meu contato, porque a partir de agora eu sou o seu novo gerente de relacionamento. Sempre que precisar, estou à disposição para suporte, investimentos, linhas de crédito e demais assuntos da sua conta.\n\nE quando estiver pela região, fica o convite para passar na agência e tomar um café. Será um prazer te atender!"
+  },
+  {
+    titulo: "Explicação da rotatividade (Mulher)",
+    mensagem: "A rotatividade nas carteiras de gerência acontece quando o banco redistribui os clientes entre os gerentes de relacionamento. Isso não significa necessariamente que o gerente saiu da agência.\n\nPor exemplo, a {NOME_GERENTE} pode continuar trabalhando na mesma agência, mas passar a atender outra carteira de clientes, enquanto a sua conta passa a ficar sob a responsabilidade de outro gerente.\n\nEssas mudanças podem ocorrer por reorganização interna, redistribuição de clientes ou ajustes na estrutura de atendimento. A frequência e os critérios dependem das decisões internas do Bradesco."
+  },
+  {
+    titulo: "Explicação da rotatividade (Homem)",
+    mensagem: "A rotatividade nas carteiras de gerência acontece quando o banco redistribui os clientes entre os gerentes de relacionamento. Isso não significa necessariamente que o gerente saiu da agência.\n\nPor exemplo, o {NOME_GERENTE} pode continuar trabalhando na mesma agência, mas passar a atender outra carteira de clientes, enquanto a sua conta passa a ficar sob a responsabilidade de outro gerente.\n\nEssas mudanças podem ocorrer por reorganização interna, redistribuição de clientes ou ajustes na estrutura de atendimento. A frequência e os critérios dependem das decisões internas do Bradesco."
+  },
+
+  /* ── AGÊNCIA / LOGÍSTICA ───────────────────────────────────────── */
+  {
+    grupo: "Agência e agenda",
+    titulo: "Estou em uma visita",
+    mensagem: "No momento estou em uma visita, mas você pode ser atendido normalmente por um dos meus assistentes que está na agência. Pode passar por lá que eles dão continuidade ao atendimento, tá bom?"
+  },
+  {
+    titulo: "Receber cliente na agência",
+    mensagem: "Pode sim! Será um prazer te atender. Quando passar na agência, é só me procurar. Se puder, me avise antes para eu confirmar se estarei disponível, pois posso estar em horário de almoço ou em alguma visita externa."
+  }
+];
+
+// Chaves extras manuais (opcionais). Deixe vazio se não for usar.
+const CAMPOS_EXTRA = {
+  // CIDADE: "São Paulo"
+};
+
+/* ── Auto-chaves ── */
+const NOMES_DIA = ["Domingo","Segunda-feira","Terça-feira","Quarta-feira",
+                   "Quinta-feira","Sexta-feira","Sábado"];
+
+function getSaudacao(){
+  const h = new Date().getHours();
+  if (h >= 5  && h < 12) return "Bom dia";
+  if (h >= 12 && h < 18) return "Boa tarde";
+  return "Boa noite";
+}
+function getDia(){ return NOMES_DIA[new Date().getDay()]; }
+function getNomeCliente(){
+  const n = document.getElementById("nome-cliente").value.trim();
+  return n || "cliente";                                  // vazio → "cliente"
+}
+function getNomeGerente(){
+  const n = document.getElementById("nome-gerente").value.trim();
+  // vazio → devolve a própria chave, para ficar visível no texto e lembrar de preencher
+  return n || "{NOME_GERENTE}";
+}
+// Mesma regra para empresa e conta: vazio → chave fica visível no texto
+const getEmpresa = () => document.getElementById("empresa").value.trim() || "{EMPRESA}";
+const getConta   = () => document.getElementById("conta").value.trim()   || "{CONTA}";
+
+function aplicarChaves(texto){
+  const mapa = {
+    SAUDACAO: getSaudacao(),
+    DIA: getDia(),
+    NOME_CLIENTE: getNomeCliente(),
+    NOME_GERENTE: getNomeGerente(),
+    EMPRESA: getEmpresa(),
+    CONTA: getConta(),
+    NOME: getNomeCliente(),   // compatibilidade com mensagens antigas
+    ...CAMPOS_EXTRA
+  };
+  return texto.replace(/\{(\w+)\}/g, (bruta, chave) => chave in mapa ? mapa[chave] : bruta);
+}
+
+/* ── Estado da UI ── */
+let indiceAtivo = -1;
+
+const lista   = document.getElementById("lista-titulos");
+const painel  = document.getElementById("painel");
+const btnCop  = document.getElementById("btn-copiar");
+const btnRest = document.getElementById("btn-restaurar");
+
+// Monta o menu de títulos com rótulos de grupo
+let grupoAtual = null;
+MENSAGENS.forEach((m, i) => {
+  if (m.grupo && m.grupo !== grupoAtual){
+    const g = document.createElement("div");
+    g.className = "grupo";
+    g.textContent = m.grupo;
+    lista.appendChild(g);
+    grupoAtual = m.grupo;
+  }
+  const b = document.createElement("button");
+  b.className = "titulo";
+  b.innerHTML = `<span class="num">${i+1}</span><span>${m.titulo}</span>`;
+  b.addEventListener("click", () => selecionar(i));
+  lista.appendChild(b);
+});
+
+function selecionar(i){
+  indiceAtivo = i;
+  [...lista.querySelectorAll(".titulo")].forEach((el, j) => el.classList.toggle("ativa", j === i));
+  painel.value = aplicarChaves(MENSAGENS[i].mensagem);
+  atualizarRodape();
+}
+
+// Mudou qualquer nome → atualiza a mensagem na hora
+["nome-cliente","nome-gerente","empresa","conta"].forEach(id => {
+  document.getElementById(id).addEventListener("input", () => {
+    if (indiceAtivo >= 0) painel.value = aplicarChaves(MENSAGENS[indiceAtivo].mensagem);
+    else painel.value = aplicarChaves(painel.value);
+    atualizarRodape();
+  });
+});
+
+// Teclas 1–9 escolhem a mensagem sem tirar a mão do teclado
+document.addEventListener("keydown", e => {
+  const tag = document.activeElement.tagName;
+  if (/^[1-9]$/.test(e.key) && tag !== "TEXTAREA" && tag !== "INPUT") {
+    const i = +e.key - 1;
+    if (i < MENSAGENS.length) selecionar(i);
+  }
+});
+
+// Restaurar original (caso o atendente tenha editado o painel)
+btnRest.addEventListener("click", () => {
+  if (indiceAtivo >= 0) painel.value = aplicarChaves(MENSAGENS[indiceAtivo].mensagem);
+});
+
+// Copiar com fallback para navegadores antigos / HTTP
+async function copiar(){
+  const texto = painel.value.trim();
+  if (!texto) return;
+  try { await navigator.clipboard.writeText(texto); }
+  catch {
+    painel.focus(); painel.select();
+    document.execCommand("copy");
+  }
+  const old = btnCop.innerHTML;
+  btnCop.innerHTML = "✓ Copiado!";
+  btnCop.classList.add("copiado");
+  setTimeout(() => { btnCop.innerHTML = old; btnCop.classList.remove("copiado"); }, 1500);
+}
+btnCop.addEventListener("click", copiar);
+
+// Relógio + rodapé
+function atualizarHoras(){
+  document.getElementById("hora-atual").textContent =
+    new Date().toLocaleDateString("pt-BR",{weekday:"long", day:"2-digit", month:"long"}) +
+    " · " + new Date().toLocaleTimeString("pt-BR",{hour:"2-digit", minute:"2-digit"});
+}
+function atualizarRodape(){
+  const emp = document.getElementById("empresa").value.trim();
+  const cta = document.getElementById("conta").value.trim();
+  let extra = "";
+  if (emp) extra += ` · Empresa: ${emp}`;
+  if (cta) extra += ` · Conta: ${cta}`;
+  document.getElementById("rodape").textContent =
+    `Saudação: ${getSaudacao()} · Dia: ${getDia()} · Cliente: ${getNomeCliente()}${extra}`;
+}
+setInterval(atualizarHoras, 1000 * 30);
+atualizarHoras();
+atualizarRodape();
+selecionar(0); // abre já com a primeira mensagem
+</script>
+</body>
+</html>
