@@ -314,7 +314,7 @@ $('btnCarregar').addEventListener('click', function(){
     ag: d => d.ag, conta: d => d.conta,
     situacao: d => d.situacao, sitcad: () => 'REGULAR',
     usuario: d => d.usuario, celular: d => d.telefone, email: d => d.email,
-    cidade: d => d.cidade, uf: d => d.uf
+    cidade: d => d.cidade, uf: d => d.uf, endereco: d => d.endereco, cep: d => d.cep, bairro: d => d.bairro
   });
   if (dados.socio.nome || dados.socio.cpf){
     if (!socios.length) socios.push({cargo:'',nome:'',cpf:'',contato:''});

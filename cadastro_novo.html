@@ -133,7 +133,7 @@ function exportPNG(){if(!ready)return;render();$('download').disabled=true;canva
 async function copyText(){const text=buildText();try{await navigator.clipboard.writeText(text);status('Texto copiado.');}catch(error){const area=document.createElement('textarea');area.value=text;document.body.append(area);area.select();const copied=document.execCommand('copy');area.remove();status(copied?'Texto copiado.':'O navegador bloqueou a cópia. Tente abrir o HTML em outro navegador.');}}
 $('btnCarregar').onclick=()=>{
   const d=BN.parseDadosCliente($('textoCliente').value);
-  const map={nome:x=>d.nome,doc:x=>d.cnpj,ag:x=>d.ag,conta:x=>d.conta,cidade:x=>d.cidade,uf:x=>d.uf,situacao:x=>d.situacao,usuario:x=>d.usuario,celular:x=>d.telefone,email:x=>d.email};
+  const map={nome:x=>d.nome,doc:x=>d.cnpj,ag:x=>d.ag,conta:x=>d.conta,cidade:x=>d.cidade,uf:x=>d.uf,situacao:x=>d.situacao,usuario:x=>d.usuario,celular:x=>d.telefone,email:x=>d.email,endereco:x=>d.endereco,cep:x=>d.cep,bairro:x=>d.bairro,pag:x=>'001',datahora:x=>new Date().toLocaleString('pt-BR',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})};
   Object.keys(map).forEach(k=>{const v=map[k](d);if(v){state.fields[k]=v;}});
   if(d.socio.nome||d.socio.cpf){
     if(!state.partners.length)state.partners.push({cargo:'',nome:'',cpf:'',contato:''});
